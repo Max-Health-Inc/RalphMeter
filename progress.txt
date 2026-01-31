@@ -167,3 +167,29 @@ it passes ALL applicable gates. Dead code and untested code are properly exclude
 
 ---
 
+## 2026-01-31 - US-010
+- Implemented: Benchmark Suite - Comparison Engine
+- Files changed:
+  - Created src/benchmarks/comparison.ts - BenchmarkComparison class for comparing sessions against benchmarks
+  - Created src/benchmarks/comparison.test.ts - Comprehensive test suite with 29 tests
+  - Modified src/benchmarks/index.ts - Added comparison exports to barrel
+  - Modified package.json - Updated build script to copy benchmark references to dist
+  - Modified prd.json - Marked US-010 as passes: true
+- **Learnings for future iterations:**
+  - Benchmark reference JSON files must be copied to dist/ during build (not handled by tsc)
+  - Use `cp -r src/benchmarks/references dist/benchmarks/` in build script
+  - Session IDs in tests must be valid UUIDs - use `createSessionId()` from events.ts
+  - Iteration events require `iterationNumber` (positive int) and `success` (boolean) fields
+  - Test helper functions should return sessionId when they create sessions
+  - BenchmarkComparison works with optional ComputedMetrics - basic comparison without it
+  - Ralph comparison is only included when ComputedMetrics are provided
+  - Expected Ralph range is heuristic: complexityScore * 10 to complexityScore * 50
+  - Efficiency score: 3 metrics (LOC, iterations, Ralph) with ratio = inRange / total
+  - Grade thresholds: A+ (1.0), A (0.85), B (0.7), C (0.5), D (0.3), F (<0.3)
+  - Pass threshold is 0.7 (B grade or better)
+  - Recommendations are type-specific: success, warning, or error
+  - formatReport() creates box-drawn ASCII art reports with consistent width
+  - Variance calculation: actual - midpoint of expected range
+  - Lower iterations is better (efficiency), so under range can still pass
+
+---
