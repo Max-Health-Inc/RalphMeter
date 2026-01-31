@@ -308,7 +308,10 @@ curl http://localhost:3333/api/sessions
 # Get detailed metrics for a session
 curl http://localhost:3333/api/sessions/{sessionId}/metrics
 
-# Or use the CLI (coming in US-008)
+# Export session data in open format (for ecosystem tooling)
+curl http://localhost:3333/api/sessions/{sessionId}/export
+
+# Or use the CLI
 ralphmeter report {sessionId}
 ```
 
