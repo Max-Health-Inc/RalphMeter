@@ -604,6 +604,102 @@ describe('MetricsCalculator', () => {
       expect(trend[1]?.storyId).toBe('US-002');
       expect(trend[2]?.storyId).toBe('US-003');
     });
+
+    it('tracks per-story deltas correctly', () => {
+      collector.emit(createSessionStartEvent(sessionId));
+
+      // First story - 1000 tokens, 100 LOC added
+      collector.emit(createTokensInEvent(sessionId, 1000));
+      const result1 = calculator.recordSynthMeasurement(
+        sessionId,
+        'US-001',
+        createCodebaseSnapshot({ total: 100, code: 80, comments: 10, blank: 10 })
+      );
+
+      expect(isOk(result1)).toBe(true);
+      if (isOk(result1)) {
+        const point = result1.value;
+        expect(point.tokensSpent).toBe(1000); // All tokens for first story
+        expect(point.linesAdded).toBe(100); // All lines added
+        expect(point.linesDeleted).toBe(0); // No lines deleted
+        expect(point.netDelta).toBe(100); // Net = added - deleted
+        expect(point.storySynth).toBe(10); // 1000 / 100
+      }
+
+      // Second story - 2000 more tokens, 50 more LOC added
+      collector.emit(createTokensInEvent(sessionId, 2000));
+      const result2 = calculator.recordSynthMeasurement(
+        sessionId,
+        'US-002',
+        createCodebaseSnapshot({ total: 150, code: 120, comments: 15, blank: 15 })
+      );
+
+      expect(isOk(result2)).toBe(true);
+      if (isOk(result2)) {
+        const point = result2.value;
+        expect(point.tokensSpent).toBe(2000); // Tokens for this story only
+        expect(point.linesAdded).toBe(50); // Lines added in this story
+        expect(point.linesDeleted).toBe(0); // No lines deleted
+        expect(point.netDelta).toBe(50); // Net = added - deleted
+        expect(point.storySynth).toBe(40); // 2000 / 50
+      }
+    });
+
+    it('tracks line deletions correctly', () => {
+      collector.emit(createSessionStartEvent(sessionId));
+
+      // First story - 100 LOC
+      collector.emit(createTokensInEvent(sessionId, 1000));
+      calculator.recordSynthMeasurement(
+        sessionId,
+        'US-001',
+        createCodebaseSnapshot({ total: 100, code: 80, comments: 10, blank: 10 })
+      );
+
+      // Second story - refactored to 80 LOC (deleted 20 lines)
+      collector.emit(createTokensInEvent(sessionId, 500));
+      const result = calculator.recordSynthMeasurement(
+        sessionId,
+        'US-002',
+        createCodebaseSnapshot({ total: 80, code: 64, comments: 8, blank: 8 })
+      );
+
+      expect(isOk(result)).toBe(true);
+      if (isOk(result)) {
+        const point = result.value;
+        expect(point.linesAdded).toBe(0); // No lines added
+        expect(point.linesDeleted).toBe(20); // 20 lines deleted
+        expect(point.netDelta).toBe(-20); // Net = 0 - 20
+        expect(point.storySynth).toBeUndefined(); // No storySynth when no lines added
+      }
+    });
+
+    it('calculates storySynth only when lines are added', () => {
+      collector.emit(createSessionStartEvent(sessionId));
+
+      // First story
+      collector.emit(createTokensInEvent(sessionId, 1000));
+      calculator.recordSynthMeasurement(
+        sessionId,
+        'US-001',
+        createCodebaseSnapshot({ total: 100, code: 80, comments: 10, blank: 10 })
+      );
+
+      // Story with no net LOC change (same LOC but different files maybe)
+      collector.emit(createTokensInEvent(sessionId, 500));
+      const result = calculator.recordSynthMeasurement(
+        sessionId,
+        'US-002',
+        createCodebaseSnapshot({ total: 100, code: 80, comments: 10, blank: 10 })
+      );
+
+      expect(isOk(result)).toBe(true);
+      if (isOk(result)) {
+        const point = result.value;
+        expect(point.linesAdded).toBe(0);
+        expect(point.storySynth).toBeUndefined(); // Not calculated when linesAdded = 0
+      }
+    });
   });
 
   // ==========================================================================
