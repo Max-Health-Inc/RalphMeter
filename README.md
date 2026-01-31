@@ -4,6 +4,8 @@
 
 **Ralph** — Tokens per Verified LOC. Lower is better.
 
+Built for [Ralph](https://github.com/snarktank/ralph) — the autonomous AI coding methodology.
+
 ![RalphMeter Architecture](image.png)
 
 ## What This Measures
