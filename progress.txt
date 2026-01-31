@@ -122,3 +122,26 @@ it passes ALL applicable gates. Dead code and untested code are properly exclude
 
 ---
 
+## 2026-01-31 - US-007
+- Implemented: Ralph Integration - Hook System
+- Files changed:
+  - Created src/integrations/ directory
+  - Created src/integrations/ralph-hooks.ts - Hook system for Ralph agent integration with createRalphHooks factory
+  - Created src/integrations/ralph-hooks.test.ts - Comprehensive integration tests with mock server (23 tests)
+  - Created src/integrations/index.ts - Barrel exports for integrations module
+  - Modified src/index.ts - Added integrations to main exports
+  - Modified README.md - Added Ralph Integration section with TypeScript and shell script examples
+  - Modified prd.json - Marked US-007 as passes: true
+- **Learnings for future iterations:**
+  - Hook system uses fetch API for HTTP requests with AbortController for timeouts
+  - Hooks fail gracefully (no throw) to avoid crashing Ralph on network errors
+  - Each hook creates properly typed events matching the event schemas
+  - onSessionStart creates the session via POST /api/sessions then sends session_start event
+  - Optional fields in payloads use conditional spreading: `...(field !== undefined && { field })`
+  - Mock server tests use express with dynamic port assignment (port 0, then read actual port from server.address())
+  - Integration tests verify both success and error handling paths
+  - README examples show both TypeScript and shell script integration patterns
+  - Configuration supports: meterUrl (required), sessionId (optional), verbose (optional), timeout (optional)
+
+---
+
