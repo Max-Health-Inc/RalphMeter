@@ -347,6 +347,28 @@
       "priority": 18,
       "passes": false,
       "notes": "Quality gates are optional but enable stricter verification. vLOC meaning depends on which gates you require."
+    },
+    {
+      "id": "US-019",
+      "title": "Session Analyzer",
+      "description": "Create session analysis tools for debugging and understanding individual Ralph runs.",
+      "acceptanceCriteria": [
+        "Create src/analysis/timeline.ts with SessionTimeline class",
+        "Generate timeline view: iteration-by-iteration Synth, tokens, LOC changes",
+        "Identify spike points: where Synth increased significantly",
+        "Create src/analysis/diagnosis.ts with SessionDiagnosis class",
+        "diagnose(sessionId, storyId) returns: tokensSpent, iterationCount, gateFailures, recommendations",
+        "gateFailures includes: gate, failedLines[], errorMessages[]",
+        "recommendations: actionable suggestions (e.g., 'Story stuck on G1 - check type errors in src/foo.ts')",
+        "Create src/analysis/replay.ts - reconstruct what happened each iteration",
+        "Add GET /api/sessions/:id/timeline endpoint",
+        "Add GET /api/sessions/:id/diagnosis/:storyId endpoint",
+        "Typecheck passes",
+        "Tests pass in src/analysis/*.test.ts"
+      ],
+      "priority": 19,
+      "passes": false,
+      "notes": "Session analysis is for debugging ONE run. Benchmarking (US-009/010) is for comparing MULTIPLE runs."
     }
   ]
 }
