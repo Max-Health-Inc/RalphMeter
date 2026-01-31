@@ -60,6 +60,16 @@ export interface SynthTrendPoint {
   synth: number;
   /** Delta from previous measurement */
   synthDelta: number;
+  /** Tokens spent on this story */
+  tokensSpent: number;
+  /** Lines added in this story */
+  linesAdded: number;
+  /** Lines deleted in this story */
+  linesDeleted: number;
+  /** Net delta (linesAdded - linesDeleted) */
+  netDelta: number;
+  /** Story-specific Synth (tokensSpent / linesAdded), undefined if no lines added */
+  storySynth?: number;
 }
 
 /**
@@ -238,8 +248,21 @@ export class MetricsCalculator {
 
     // Get previous measurements
     const existing = this.synthTrends.get(sessionId) ?? [];
-    const previousSynth = existing.length > 0 ? existing[existing.length - 1]?.synth ?? 0 : 0;
+    const previous = existing.length > 0 ? existing[existing.length - 1] : null;
+    const previousSynth = previous?.synth ?? 0;
     const synthDelta = synth - previousSynth;
+
+    // Calculate per-story deltas
+    const previousTokens = previous?.cumulativeTokens ?? 0;
+    const previousLoc = previous?.loc ?? 0;
+    
+    const tokensSpent = totalTokens - previousTokens;
+    const linesAdded = loc > previousLoc ? loc - previousLoc : 0;
+    const linesDeleted = loc < previousLoc ? previousLoc - loc : 0;
+    const netDelta = linesAdded - linesDeleted;
+    
+    // Calculate storySynth only if lines were added
+    const storySynth = linesAdded > 0 ? tokensSpent / linesAdded : undefined;
 
     const point: SynthTrendPoint = {
       storyId,
@@ -248,6 +271,11 @@ export class MetricsCalculator {
       loc,
       synth,
       synthDelta,
+      tokensSpent,
+      linesAdded,
+      linesDeleted,
+      netDelta,
+      ...(storySynth !== undefined && { storySynth }),
     };
 
     // Store the measurement
@@ -426,6 +454,15 @@ export class MetricsCalculator {
             : this.formatNumber(point.synthDelta, 2);
         lines.push(
           `│ ${point.storyId.padEnd(12)} Synth: ${this.formatNumber(point.synth, 2).padStart(8)} (${delta.padStart(8)})       │`
+        );
+        
+        // Show per-story details
+        const netSign = point.netDelta >= 0 ? '+' : '';
+        const storySynthStr = point.storySynth !== undefined 
+          ? this.formatNumber(point.storySynth, 1)
+          : 'N/A';
+        lines.push(
+          `│   Tokens: ${String(point.tokensSpent).padStart(6)}  LOC: ${netSign}${String(point.netDelta).padStart(4)} (${String(point.linesAdded).padStart(3)}+/${String(point.linesDeleted).padStart(3)}-) S: ${storySynthStr.padStart(6)}  │`
         );
       }
 
