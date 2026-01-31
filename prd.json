@@ -173,7 +173,7 @@
         "CLI --help works for all commands"
       ],
       "priority": 8,
-      "passes": false,
+      "passes": true,
       "notes": "CLI is the primary interface for local use."
     },
     {
