@@ -1,0 +1,233 @@
+{
+  "project": "AuthFlow",
+  "branchName": "main",
+  "description": "A complex authentication and authorization system with user management, JWT tokens, role-based access control, and session management",
+  "userStories": [
+    {
+      "id": "AUTH-001",
+      "title": "Project Setup and Database",
+      "description": "Initialize project with database layer for user persistence",
+      "acceptanceCriteria": [
+        "Express TypeScript project structure",
+        "SQLite database setup with better-sqlite3",
+        "Database schema: users (id, email, password_hash, role, created_at, updated_at)",
+        "Database schema: sessions (id, user_id, token, expires_at, created_at)",
+        "Database migrations or initialization script",
+        "Environment configuration (.env support)",
+        "Error handling middleware"
+      ],
+      "priority": 1,
+      "passes": false,
+      "notes": "Foundation with proper persistence"
+    },
+    {
+      "id": "AUTH-002",
+      "title": "User Model and Validation",
+      "description": "Define user data models with comprehensive validation",
+      "acceptanceCriteria": [
+        "User interface: id, email, passwordHash, role (admin|user), createdAt, updatedAt",
+        "Session interface: id, userId, token, expiresAt, createdAt",
+        "Zod schemas for: RegisterInput, LoginInput, UpdateProfileInput",
+        "Email validation (proper email format)",
+        "Password requirements (min 8 chars, uppercase, lowercase, number)",
+        "Role enum with validation",
+        "Type exports"
+      ],
+      "priority": 2,
+      "passes": false,
+      "notes": "Strong validation foundation"
+    },
+    {
+      "id": "AUTH-003",
+      "title": "Password Hashing",
+      "description": "Implement secure password hashing and verification",
+      "acceptanceCriteria": [
+        "Use bcrypt for password hashing",
+        "hashPassword(plain) function with salt rounds = 10",
+        "verifyPassword(plain, hash) function",
+        "Never store plain text passwords",
+        "Tests for hash/verify operations"
+      ],
+      "priority": 3,
+      "passes": false,
+      "notes": "Security critical - proper bcrypt usage"
+    },
+    {
+      "id": "AUTH-004",
+      "title": "JWT Token Generation",
+      "description": "Implement JWT token creation and verification",
+      "acceptanceCriteria": [
+        "Use jsonwebtoken library",
+        "generateToken(userId, email, role) function",
+        "verifyToken(token) function",
+        "Tokens expire after 24 hours",
+        "Include userId, email, role in payload",
+        "Use secret from environment variable",
+        "Tests for token generation and verification"
+      ],
+      "priority": 4,
+      "passes": false,
+      "notes": "JWT for stateless authentication"
+    },
+    {
+      "id": "AUTH-005",
+      "title": "User Registration",
+      "description": "POST /api/auth/register - Create new user account",
+      "acceptanceCriteria": [
+        "POST /api/auth/register accepts { email, password }",
+        "Validates input with Zod schema",
+        "Checks if email already exists (409 if duplicate)",
+        "Hashes password before storing",
+        "Creates user with role: 'user' by default",
+        "Returns 201 with user data (no password) and JWT token",
+        "Returns 400 for validation errors",
+        "Tests pass"
+      ],
+      "priority": 5,
+      "passes": false,
+      "notes": "First authentication endpoint"
+    },
+    {
+      "id": "AUTH-006",
+      "title": "User Login",
+      "description": "POST /api/auth/login - Authenticate user and return token",
+      "acceptanceCriteria": [
+        "POST /api/auth/login accepts { email, password }",
+        "Validates input",
+        "Looks up user by email",
+        "Verifies password hash",
+        "Creates session record in database",
+        "Returns 200 with user data and JWT token",
+        "Returns 401 for invalid credentials",
+        "Returns 400 for validation errors",
+        "Tests pass"
+      ],
+      "priority": 6,
+      "passes": false,
+      "notes": "Core authentication flow"
+    },
+    {
+      "id": "AUTH-007",
+      "title": "Authentication Middleware",
+      "description": "Create middleware to protect routes with JWT verification",
+      "acceptanceCriteria": [
+        "requireAuth() middleware extracts Bearer token from Authorization header",
+        "Verifies JWT token validity",
+        "Checks token expiration",
+        "Looks up user in database",
+        "Attaches user to request object (req.user)",
+        "Returns 401 if token missing, invalid, or expired",
+        "Returns 401 if user not found",
+        "Tests with valid and invalid tokens"
+      ],
+      "priority": 7,
+      "passes": false,
+      "notes": "Critical middleware for protected routes"
+    },
+    {
+      "id": "AUTH-008",
+      "title": "Role-Based Access Control",
+      "description": "Implement authorization middleware for role checking",
+      "acceptanceCriteria": [
+        "requireRole(...roles) middleware checks user role",
+        "Requires authentication first (depends on requireAuth)",
+        "Returns 403 if user lacks required role",
+        "Supports multiple allowed roles",
+        "Tests for admin-only and user access"
+      ],
+      "priority": 8,
+      "passes": false,
+      "notes": "Authorization layer on top of authentication"
+    },
+    {
+      "id": "AUTH-009",
+      "title": "Get Current User",
+      "description": "GET /api/auth/me - Get authenticated user profile",
+      "acceptanceCriteria": [
+        "GET /api/auth/me protected with requireAuth",
+        "Returns current user data (no password)",
+        "Returns 401 if not authenticated",
+        "Tests with valid token"
+      ],
+      "priority": 9,
+      "passes": false,
+      "notes": "Profile retrieval"
+    },
+    {
+      "id": "AUTH-010",
+      "title": "Update User Profile",
+      "description": "PATCH /api/auth/me - Update current user's profile",
+      "acceptanceCriteria": [
+        "PATCH /api/auth/me protected with requireAuth",
+        "Accepts { email?, password? }",
+        "Validates input",
+        "Checks email uniqueness if changing email",
+        "Hashes new password if provided",
+        "Updates updatedAt timestamp",
+        "Returns 200 with updated user data",
+        "Returns 400 for validation errors",
+        "Returns 409 if email already taken",
+        "Tests pass"
+      ],
+      "priority": 10,
+      "passes": false,
+      "notes": "Self-service profile updates"
+    },
+    {
+      "id": "AUTH-011",
+      "title": "User Logout",
+      "description": "POST /api/auth/logout - Invalidate current session",
+      "acceptanceCriteria": [
+        "POST /api/auth/logout protected with requireAuth",
+        "Invalidates/deletes session record from database",
+        "Returns 204 on success",
+        "Tests pass"
+      ],
+      "priority": 11,
+      "passes": false,
+      "notes": "Session cleanup"
+    },
+    {
+      "id": "AUTH-012",
+      "title": "Admin User Management",
+      "description": "Admin endpoints to list and manage users",
+      "acceptanceCriteria": [
+        "GET /api/admin/users - list all users (admin only)",
+        "GET /api/admin/users/:id - get user details (admin only)",
+        "DELETE /api/admin/users/:id - delete user (admin only)",
+        "All endpoints protected with requireAuth and requireRole('admin')",
+        "Returns 403 for non-admin users",
+        "Tests for admin access and forbidden scenarios"
+      ],
+      "priority": 12,
+      "passes": false,
+      "notes": "Admin capabilities"
+    },
+    {
+      "id": "AUTH-013",
+      "title": "Session Cleanup",
+      "description": "Implement automatic cleanup of expired sessions",
+      "acceptanceCriteria": [
+        "cleanupExpiredSessions() function deletes expired session records",
+        "Called on server startup",
+        "Called periodically (e.g., every hour) using setInterval",
+        "Logs number of sessions cleaned",
+        "Tests verify expired sessions are removed"
+      ],
+      "priority": 13,
+      "passes": false,
+      "notes": "Maintenance task for session hygiene"
+    }
+  ],
+  "metadata": {
+    "expectedLOC": {
+      "min": 400,
+      "max": 600
+    },
+    "complexityScore": 9,
+    "expectedIterations": {
+      "min": 8,
+      "max": 15
+    }
+  }
+}
