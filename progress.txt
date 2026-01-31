@@ -193,3 +193,27 @@ it passes ALL applicable gates. Dead code and untested code are properly exclude
   - Lower iterations is better (efficiency), so under range can still pass
 
 ---
+
+## 2026-01-31 - US-0011
+- Implemented: Export - Open Metrics Format
+- Files changed:
+  - Created src/export/format.ts - RalphMeterExport interface with Zod schemas for validation
+  - Created src/export/exporter.ts - exportSession function with dependencies injection pattern
+  - Created src/export/index.ts - Barrel exports for export module
+  - Created src/export/schema.json - JSON Schema for RalphMeterExport format
+  - Created src/export/exporter.test.ts - 10 comprehensive tests covering all export scenarios
+  - Modified src/index.ts - Added export module to main exports
+  - Modified src/api/server.ts - Added GET /api/sessions/:id/export endpoint
+  - Modified prd.json - Marked US-0011 as passes: true
+- **Learnings for future iterations:**
+  - SessionGateStats has `perGate` field (Record<Gate, GateStats>) instead of direct G1/G2/G3 properties
+  - MetricsCalculator.getReport() returns MetricsReport (with metrics, synthTrend, locBreakdown), not just ComputedMetrics
+  - Export format is versioned (v1) to enable future backward compatibility
+  - All nullable fields in export use `| null` instead of `| undefined` for JSON compatibility
+  - Export function uses dependency injection pattern for testability
+  - JSON Schema uses "oneOf" for nullable types to maintain strict validation
+  - Export endpoint uses same query parameter schema (rootPath) as metrics endpoint
+  - Export with rootPath includes computed metrics, LOC breakdown, and synth trend
+  - Export without rootPath only includes session metadata, events, and basic session metrics
+
+---
