@@ -118,7 +118,7 @@
         "Tests pass in src/core/metrics.test.ts"
       ],
       "priority": 5,
-      "passes": false,
+      "passes": true,
       "notes": "Cumulative Ralph is the headline metric; per-story deltas enable drill-down analysis."
     },
     {
@@ -138,7 +138,7 @@
         "Tests pass using supertest"
       ],
       "priority": 6,
-      "passes": false,
+      "passes": true,
       "notes": "API enables external tools to send events and read metrics."
     },
     {
