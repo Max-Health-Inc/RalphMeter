@@ -145,3 +145,25 @@ it passes ALL applicable gates. Dead code and untested code are properly exclude
 
 ---
 
+## 2026-01-31 - US-008
+- Implemented: CLI Tool - Basic Commands
+- Files changed:
+  - Created src/cli/index.ts - Commander.js-based CLI with start, status, and report commands
+  - Created src/cli/index.test.ts - Comprehensive tests for all CLI commands (10 tests)
+  - Modified prd.json - Marked US-008 as passes: true
+- **Learnings for future iterations:**
+  - Commander.js provides excellent argument parsing with automatic help generation
+  - CLI commands use fetch API to communicate with the RalphMeter API server
+  - Start command launches server on configurable port (default 3333)
+  - Status command groups sessions by status (active, completed, failed) with emoji indicators
+  - Report command shows basic metrics by default, full metrics with --root-path option
+  - Error handling includes helpful messages for common issues (server not running, session not found)
+  - Tests use spawn to run actual CLI binary and capture stdout/stderr
+  - Test server uses port 0 for random available port to avoid conflicts
+  - All CLI commands support --url option to connect to different server instances
+  - Shebang (#!/usr/bin/env node) in source file is preserved during TypeScript compilation
+  - package.json bin entry already configured to use dist/cli/index.js
+  - CLI provides user-friendly output with formatted tables and colored status indicators
+
+---
+
