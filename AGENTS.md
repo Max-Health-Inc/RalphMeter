@@ -62,19 +62,19 @@ AI Explorer:
 
 ### Core Metrics
 See [README.md](README.md) for full metric definitions. Key metrics:
-- **Synth**: Cumulative Tokens / Current LOC (lower is better)
+- **Ralph**: Cumulative Tokens / Current LOC (lower is better)
 - **vLOC**: Lines passing all applicable gates
 - **Verification Rate**: vLOC / LOC
 
-### Synth Calculation (Cumulative)
+### Ralph Calculation (Cumulative)
 ```
-After Story 1:  3,600 tokens,  100 LOC → Synth = 36
-After Story 2:  4,400 tokens,  180 LOC → Synth = 24 ✓ improving
-After Story 3: 14,400 tokens,  180 LOC → Synth = 80 ⚠️ spike!
+After Story 1:  3,600 tokens,  100 LOC → Ralph = 36
+After Story 2:  4,400 tokens,  180 LOC → Ralph = 24 ✓ improving
+After Story 3: 14,400 tokens,  180 LOC → Ralph = 80 ⚠️ spike!
 ```
 
-Synth = cumulative tokens / current LOC (codebase snapshot).
-Stories are the **measurement boundary** — Synth is recalculated when a story completes.
+Ralph = cumulative tokens / current LOC (codebase snapshot).
+Stories are the **measurement boundary** — Ralph is recalculated when a story completes.
 Verification is **line-level** — each line must pass all applicable gates.
 
 ### Architecture

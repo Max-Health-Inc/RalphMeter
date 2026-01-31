@@ -2,7 +2,7 @@
  * Metrics Calculator for RalphMeter
  *
  * Computes the headline efficiency metrics for AI code synthesis.
- * The key insight: Synth (tokens per LOC) is the physical unit for AI energy.
+ * The key insight: Ralph (tokens per LOC) is the physical unit for AI energy.
  */
 
 import { type Result, ok, err } from '../shared/result.js';
@@ -28,7 +28,7 @@ export interface ComputedMetrics {
   locPerMinute: number;
   /** Verified lines of code per minute */
   vlocPerMinute: number;
-  /** Tokens per LOC (Synth): Cumulative tokens / Current LOC */
+  /** Tokens per LOC (Ralph): Cumulative tokens / Current LOC */
   tokensPerLOC: number;
   /** PoE-LOC: Probability of error per line of code */
   poeLOC: number;
@@ -45,7 +45,7 @@ export interface ComputedMetrics {
 }
 
 /**
- * Synth trend data point
+ * Ralph trend data point
  */
 export interface SynthTrendPoint {
   /** Story ID that triggered this measurement */
@@ -56,8 +56,8 @@ export interface SynthTrendPoint {
   cumulativeTokens: number;
   /** LOC at this point */
   loc: number;
-  /** Synth value at this point (tokens / LOC) */
-  synth: number;
+  /** Ralph value at this point (tokens / LOC) */
+  Ralph: number;
   /** Delta from previous measurement */
   synthDelta: number;
   /** Tokens spent on this story */
@@ -68,7 +68,7 @@ export interface SynthTrendPoint {
   linesDeleted: number;
   /** Net delta (linesAdded - linesDeleted) */
   netDelta: number;
-  /** Story-specific Synth (tokensSpent / linesAdded), undefined if no lines added */
+  /** Story-specific Ralph (tokensSpent / linesAdded), undefined if no lines added */
   storySynth?: number;
 }
 
@@ -78,7 +78,7 @@ export interface SynthTrendPoint {
 export interface MetricsReport {
   /** Computed metrics */
   metrics: ComputedMetrics;
-  /** Synth trend over time */
+  /** Ralph trend over time */
   synthTrend: SynthTrendPoint[];
   /** LOC breakdown by category */
   locBreakdown: LOCResult;
@@ -104,11 +104,11 @@ export interface MetricsError {
 /**
  * Calculates efficiency metrics for AI code synthesis sessions.
  *
- * The key metric is Synth (tokens per LOC), which represents the
+ * The key metric is Ralph (tokens per LOC), which represents the
  * "energy cost" of synthesizing code.
  */
 export class MetricsCalculator {
-  /** Synth trend history per session */
+  /** Ralph trend history per session */
   private synthTrends = new Map<string, SynthTrendPoint[]>();
 
   constructor(
@@ -188,7 +188,7 @@ export class MetricsCalculator {
     const totalTokens =
       sessionMetrics.totalTokensIn + sessionMetrics.totalTokensOut;
 
-    // Synth: Cumulative Tokens / Current LOC
+    // Ralph: Cumulative Tokens / Current LOC
     const tokensPerLOC = totalLOC > 0 ? totalTokens / totalLOC : 0;
 
     // PoE-LOC: overall probability of error
@@ -211,8 +211,8 @@ export class MetricsCalculator {
   }
 
   /**
-   * Records a Synth measurement after a story completes.
-   * Call this after each story to track Synth trends.
+   * Records a Ralph measurement after a story completes.
+   * Call this after each story to track Ralph trends.
    *
    * @param sessionId - The session ID
    * @param storyId - The completed story ID
@@ -244,13 +244,13 @@ export class MetricsCalculator {
       });
     }
 
-    const synth = totalTokens / loc;
+    const Ralph = totalTokens / loc;
 
     // Get previous measurements
     const existing = this.synthTrends.get(sessionId) ?? [];
     const previous = existing.length > 0 ? existing[existing.length - 1] : null;
-    const previousSynth = previous?.synth ?? 0;
-    const synthDelta = synth - previousSynth;
+    const previousSynth = previous?.Ralph ?? 0;
+    const synthDelta = Ralph - previousSynth;
 
     // Calculate per-story deltas
     const previousTokens = previous?.cumulativeTokens ?? 0;
@@ -269,7 +269,7 @@ export class MetricsCalculator {
       timestamp: new Date().toISOString(),
       cumulativeTokens: totalTokens,
       loc,
-      synth,
+      Ralph,
       synthDelta,
       tokensSpent,
       linesAdded,
@@ -289,7 +289,7 @@ export class MetricsCalculator {
   }
 
   /**
-   * Gets the Synth trend history for a session
+   * Gets the Ralph trend history for a session
    *
    * @param sessionId - The session ID
    * @returns Array of trend points or empty array if none
@@ -366,7 +366,7 @@ export class MetricsCalculator {
     lines.push('│ HEADLINE METRICS                                            │');
     lines.push('├─────────────────────────────────────────────────────────────┤');
     lines.push(
-      `│ Synth (Tokens/LOC):     ${this.formatNumber(m.tokensPerLOC, 2).padStart(12)}                     │`
+      `│ Ralph (Tokens/LOC):     ${this.formatNumber(m.tokensPerLOC, 2).padStart(12)}                     │`
     );
     lines.push(
       `│ Verified LOC:           ${String(m.verifiedLOC).padStart(12)} / ${String(m.totalLOC).padEnd(12)}     │`
@@ -441,10 +441,10 @@ export class MetricsCalculator {
       lines.push('');
     }
 
-    // Synth trend if available
+    // Ralph trend if available
     if (report.synthTrend.length > 0) {
       lines.push('┌─────────────────────────────────────────────────────────────┐');
-      lines.push('│ SYNTH TREND                                                 │');
+      lines.push('│ Ralph TREND                                                 │');
       lines.push('├─────────────────────────────────────────────────────────────┤');
 
       for (const point of report.synthTrend) {
@@ -453,7 +453,7 @@ export class MetricsCalculator {
             ? `+${this.formatNumber(point.synthDelta, 2)}`
             : this.formatNumber(point.synthDelta, 2);
         lines.push(
-          `│ ${point.storyId.padEnd(12)} Synth: ${this.formatNumber(point.synth, 2).padStart(8)} (${delta.padStart(8)})       │`
+          `│ ${point.storyId.padEnd(12)} Ralph: ${this.formatNumber(point.Ralph, 2).padStart(8)} (${delta.padStart(8)})       │`
         );
         
         // Show per-story details

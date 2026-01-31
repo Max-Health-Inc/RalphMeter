@@ -18,10 +18,10 @@ Description: RalphMeter - A metering, transparency, and benchmarking layer for A
 The goal: Define the physical unit for AI code synthesis energy.
 - Input: PRD (intent)
 - Output: Verified Application (LOC that passes all gates)
-- Measure: Tokens per Synth (cost of synthesis)
+- Measure: Tokens per Ralph (cost of synthesis)
 
 Core concepts:
-- **Synth**: Cumulative Tokens / Current LOC (lower is better)
+- **Ralph**: Cumulative Tokens / Current LOC (lower is better)
 - Stories are the verification boundary — passes: true/false
 - 3-Gate Model with line-level verification:
   - G1 Compile: errors point to specific lines

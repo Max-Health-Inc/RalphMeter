@@ -392,7 +392,7 @@ describe('MetricsCalculator', () => {
       }
     });
 
-    it('calculates Synth (tokens per LOC)', () => {
+    it('calculates Ralph (tokens per LOC)', () => {
       collector.emit(createSessionStartEvent(sessionId));
       collector.emit(createTokensInEvent(sessionId, 10000));
       collector.emit(createTokensOutEvent(sessionId, 5000));
@@ -415,7 +415,7 @@ describe('MetricsCalculator', () => {
   });
 
   // ==========================================================================
-  // Synth Trend Tests
+  // Ralph Trend Tests
   // ==========================================================================
 
   describe('recordSynthMeasurement', () => {
@@ -460,7 +460,7 @@ describe('MetricsCalculator', () => {
       }
     });
 
-    it('records initial synth measurement with zero delta', () => {
+    it('records initial Ralph measurement with zero delta', () => {
       collector.emit(createSessionStartEvent(sessionId));
       collector.emit(createTokensInEvent(sessionId, 1000));
       collector.emit(createTokensOutEvent(sessionId, 500));
@@ -484,7 +484,7 @@ describe('MetricsCalculator', () => {
         expect(point.storyId).toBe('US-001');
         expect(point.cumulativeTokens).toBe(1500);
         expect(point.loc).toBe(100);
-        expect(point.synth).toBe(15); // 1500 / 100
+        expect(point.Ralph).toBe(15); // 1500 / 100
         expect(point.synthDelta).toBe(15); // First measurement = value itself
       }
     });
@@ -522,13 +522,13 @@ describe('MetricsCalculator', () => {
         expect(point.storyId).toBe('US-002');
         expect(point.cumulativeTokens).toBe(3000);
         expect(point.loc).toBe(200);
-        expect(point.synth).toBe(15); // 3000 / 200
-        // Delta = current synth - previous synth = 15 - 10 = 5
+        expect(point.Ralph).toBe(15); // 3000 / 200
+        // Delta = current Ralph - previous Ralph = 15 - 10 = 5
         expect(point.synthDelta).toBe(5);
       }
     });
 
-    it('detects spike in synth indicating problem story', () => {
+    it('detects spike in Ralph indicating problem story', () => {
       collector.emit(createSessionStartEvent(sessionId));
 
       // Normal story - 10 tokens per LOC
@@ -559,7 +559,7 @@ describe('MetricsCalculator', () => {
       if (isOk(result)) {
         const point = result.value;
         // 10000 tokens / 110 LOC = ~90.9 tokens per LOC
-        expect(point.synth).toBeCloseTo(90.909, 2);
+        expect(point.Ralph).toBeCloseTo(90.909, 2);
         // Delta = 90.9 - 10 = 80.9 (big spike!)
         expect(point.synthDelta).toBeCloseTo(80.909, 2);
       }
@@ -744,7 +744,7 @@ describe('MetricsCalculator', () => {
         ],
       });
 
-      // Record synth measurement
+      // Record Ralph measurement
       const snapshot = createCodebaseSnapshot({
         total: 100,
         code: 80,
@@ -776,7 +776,7 @@ describe('MetricsCalculator', () => {
         expect(report.sessionMetrics?.totalIterations).toBe(1);
         expect(report.sessionMetrics?.storiesCompleted).toBe(1);
 
-        // Check synth trend
+        // Check Ralph trend
         expect(report.synthTrend).toHaveLength(1);
         expect(report.synthTrend[0]?.storyId).toBe('US-001');
       }
@@ -841,7 +841,7 @@ describe('MetricsCalculator', () => {
         // Check report contains key sections
         expect(report).toContain('RALPHMETER METRICS REPORT');
         expect(report).toContain('HEADLINE METRICS');
-        expect(report).toContain('Synth (Tokens/LOC)');
+        expect(report).toContain('Ralph (Tokens/LOC)');
         expect(report).toContain('Verified LOC');
         expect(report).toContain('EFFICIENCY METRICS');
         expect(report).toContain('LOC BREAKDOWN');
@@ -881,7 +881,7 @@ describe('MetricsCalculator', () => {
       }
     });
 
-    it('includes synth trend section when measurements exist', () => {
+    it('includes Ralph trend section when measurements exist', () => {
       collector.emit(createSessionStartEvent(sessionId));
       collector.emit(createTokensInEvent(sessionId, 1000));
 
@@ -898,7 +898,7 @@ describe('MetricsCalculator', () => {
 
       expect(isOk(result)).toBe(true);
       if (isOk(result)) {
-        expect(result.value).toContain('SYNTH TREND');
+        expect(result.value).toContain('Ralph TREND');
         expect(result.value).toContain('US-001');
       }
     });
@@ -996,7 +996,7 @@ describe('MetricsCalculator', () => {
         ],
       });
 
-      // Record synth measurement after US-001
+      // Record Ralph measurement after US-001
       const snapshot1 = createCodebaseSnapshot({
         total: 50,
         code: 40,
@@ -1050,7 +1050,7 @@ describe('MetricsCalculator', () => {
         // Verify token metrics
         expect(metrics.totalTokens).toBe(11500); // 5000+2000+3000+1500
 
-        // Verify Synth
+        // Verify Ralph
         expect(metrics.tokensPerLOC).toBe(115); // 11500 / 100
 
         // Verify verified LOC (8 lines from both gate recordings)
@@ -1060,19 +1060,19 @@ describe('MetricsCalculator', () => {
         expect(metrics.verificationRate).toBe(0.08); // 8 / 100
       }
 
-      // Verify synth trend
+      // Verify Ralph trend
       const trend = calculator.getSynthTrend(sessionId);
       expect(trend).toHaveLength(2);
 
       // US-001: 7000 tokens / 50 LOC = 140
-      expect(trend[0]?.synth).toBe(140);
+      expect(trend[0]?.Ralph).toBe(140);
 
       // US-002: 11500 tokens / 100 LOC = 115 (improved!)
-      expect(trend[1]?.synth).toBe(115);
+      expect(trend[1]?.Ralph).toBe(115);
       expect(trend[1]?.synthDelta).toBe(-25); // Negative delta = improvement
     });
 
-    it('tracks efficiency degradation in synth trend', () => {
+    it('tracks efficiency degradation in Ralph trend', () => {
       collector.emit(createSessionStartEvent(sessionId));
 
       // Good start - 10 tokens per LOC
@@ -1101,9 +1101,9 @@ describe('MetricsCalculator', () => {
 
       const trend = calculator.getSynthTrend(sessionId);
 
-      expect(trend[0]?.synth).toBe(10); // 1000/100
-      expect(trend[1]?.synth).toBe(20); // 4000/200
-      expect(trend[2]?.synth).toBe(50); // 10000/200
+      expect(trend[0]?.Ralph).toBe(10); // 1000/100
+      expect(trend[1]?.Ralph).toBe(20); // 4000/200
+      expect(trend[2]?.Ralph).toBe(50); // 10000/200
 
       // Delta shows degradation
       expect(trend[1]?.synthDelta).toBe(10); // +10 from baseline

@@ -2,7 +2,7 @@
 
 > The physical unit for AI code synthesis.
 
-**Synth** — Tokens per Verified LOC. Lower is better.
+**Ralph** — Tokens per Verified LOC. Lower is better.
 
 ![RalphMeter Architecture](image.png)
 
@@ -15,12 +15,12 @@ PRD (Intent) → [Agent + Energy] → Verified Application
 RalphMeter captures the transformation from human intent to working code, measuring:
 
 - **Verified LOC (vLOC)**: Lines of code that pass all applicable gates
-- **Synth**: Tokens per Verified LOC (lower is better) — the cost of synthesis
+- **Ralph**: Tokens per Verified LOC (lower is better) — the cost of synthesis
 - **vLOC/M**: Verified LOC per Minute — effective productivity
 - **Verification Rate**: vLOC / LOC — how much survives the gates
 - **PoE-LOC**: Probability of Error per Line of Code
 
-For true energy accounting, Synth can be converted to Joules using provider-specific token-to-watt estimates.
+For true energy accounting, Ralph can be converted to Joules using provider-specific token-to-watt estimates.
 
 ## Measurement Hierarchy
 
@@ -36,21 +36,21 @@ Session (full Ralph run)
     └── Iterations 1-5: +10,000 tokens, no pass
 ```
 
-**Cumulative Synth** — recalculated after each story:
+**Cumulative Ralph** — recalculated after each story:
 
 ```
-After Story 1:  3,600 tokens,  100 LOC → Synth = 36
-After Story 2:  4,400 tokens,  180 LOC → Synth = 24 ✓ improving
-After Story 3: 14,400 tokens,  180 LOC → Synth = 80 ⚠️ spike!
+After Story 1:  3,600 tokens,  100 LOC → Ralph = 36
+After Story 2:  4,400 tokens,  180 LOC → Ralph = 24 ✓ improving
+After Story 3: 14,400 tokens,  180 LOC → Ralph = 80 ⚠️ spike!
 ```
 
 | Signal | Meaning |
 |--------|--------|
-| Synth trending down | Healthy convergence |
-| Synth spike | Problem story — tokens burned, little LOC added |
-| Synth flat | Steady progress |
+| Ralph trending down | Healthy convergence |
+| Ralph spike | Problem story — tokens burned, little LOC added |
+| Ralph flat | Steady progress |
 
-LOC is measured as a codebase snapshot. Synth = cumulative tokens / current LOC. Spikes reveal problem stories; per-story deltas enable drill-down analysis.
+LOC is measured as a codebase snapshot. Ralph = cumulative tokens / current LOC. Spikes reveal problem stories; per-story deltas enable drill-down analysis.
 
 ## The 3-Gate Model
 

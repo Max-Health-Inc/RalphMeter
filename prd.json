@@ -69,7 +69,7 @@
       "acceptanceCriteria": [
         "Create src/core/loc.ts with LOCCounter class",
         "Methods: detectLanguage(filePath), countLines(content, language), countFile(path, content), aggregate(results[]), snapshotCodebase(rootPath)",
-        "snapshotCodebase counts all LOC in codebase at a point in time (for cumulative Synth calculation)",
+        "snapshotCodebase counts all LOC in codebase at a point in time (for cumulative Ralph calculation)",
         "Support TypeScript, JavaScript, Python comment styles",
         "Return { total, code, comments, blank } breakdown",
         "Typecheck passes",
@@ -77,7 +77,7 @@
       ],
       "priority": 3,
       "passes": true,
-      "notes": "LOC is measured as codebase snapshot, not deltas. Synth = cumulative_tokens / current_LOC."
+      "notes": "LOC is measured as codebase snapshot, not deltas. Ralph = cumulative_tokens / current_LOC."
     },
     {
       "id": "US-004",
@@ -106,10 +106,10 @@
       "acceptanceCriteria": [
         "Create src/core/metrics.ts with MetricsCalculator class",
         "Constructor takes EventCollector, GateTracker, LOCCounter",
-        "calculate() returns: verifiedLOC, totalLOC, verificationRate (vLOC/LOC), locPerMinute (LOC/M), vlocPerMinute (vLOC/M), tokensPerLOC (Synth), poeLOC, totalMinutes",
+        "calculate() returns: verifiedLOC, totalLOC, verificationRate (vLOC/LOC), locPerMinute (LOC/M), vlocPerMinute (vLOC/M), tokensPerLOC (Ralph), poeLOC, totalMinutes",
         "PoE-LOC = total errors / total LOC",
-        "Synth = Cumulative Tokens / Current LOC (snapshot-based, recalculated after each story)",
-        "Track Synth trend over time — spikes indicate problem stories",
+        "Ralph = Cumulative Tokens / Current LOC (snapshot-based, recalculated after each story)",
+        "Track Ralph trend over time — spikes indicate problem stories",
         "Track per-story deltas for drill-down: { storyId, tokensSpent, linesAdded, linesDeleted, netDelta, storySynth }",
         "storySynth = tokensSpent / linesAdded (only when linesAdded > 0)",
         "Verification Rate = vLOC / LOC",
@@ -119,7 +119,7 @@
       ],
       "priority": 5,
       "passes": false,
-      "notes": "Cumulative Synth is the headline metric; per-story deltas enable drill-down analysis."
+      "notes": "Cumulative Ralph is the headline metric; per-story deltas enable drill-down analysis."
     },
     {
       "id": "US-006",
@@ -315,7 +315,7 @@
       "title": "Documentation - Complete README",
       "description": "Write comprehensive documentation.",
       "acceptanceCriteria": [
-        "Update README.md with: project vision (physical energy concept), the 3-gate model explanation, quick start guide, API reference, CLI reference, Ralph integration guide, metric definitions (PoE-LOC, Verified LOC, Synth), AI Explorer guide, contributing guide for benchmark PRDs",
+        "Update README.md with: project vision (physical energy concept), the 3-gate model explanation, quick start guide, API reference, CLI reference, Ralph integration guide, metric definitions (PoE-LOC, Verified LOC, Ralph), AI Explorer guide, contributing guide for benchmark PRDs",
         "Include architecture diagram reference to image.png",
         "Add CONTRIBUTING.md with benchmark PRD submission guidelines",
         "Typecheck passes (for any code examples)"
@@ -354,8 +354,8 @@
       "description": "Create session analysis tools for debugging and understanding individual Ralph runs.",
       "acceptanceCriteria": [
         "Create src/analysis/timeline.ts with SessionTimeline class",
-        "Generate timeline view: iteration-by-iteration Synth, tokens, LOC changes",
-        "Identify spike points: where Synth increased significantly",
+        "Generate timeline view: iteration-by-iteration Ralph, tokens, LOC changes",
+        "Identify spike points: where Ralph increased significantly",
         "Create src/analysis/diagnosis.ts with SessionDiagnosis class",
         "diagnose(sessionId, storyId) returns: tokensSpent, iterationCount, gateFailures, recommendations",
         "gateFailures includes: gate, failedLines[], errorMessages[]",

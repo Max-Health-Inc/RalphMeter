@@ -116,11 +116,11 @@ if (isOk(result)) {
 
 ### The Physical Unit
 
-RalphMeter measures the "energy" of AI code synthesis:
+RalphMeter measures the "energy" of AI code synthesis (=ralphesis):
 
 - **Input**: PRD (intent specification)
 - **Output**: Verified Application (LOC that passes all gates)
-- **Measure**: Synth = Cumulative Tokens / Current LOC
+- **Measure**: Ralph = Cumulative Tokens / Current LOC
 
 ### 3-Gate Verification Model
 
@@ -133,7 +133,7 @@ A line is verified only when it passes ALL applicable gates.
 ### Metrics
 
 - **PoE-LOC**: Probability of Error per Line of Code
-- **Synth**: Cumulative Tokens / Current LOC (efficiency measure)
+- **Ralph**: Cumulative Tokens / Current LOC (efficiency measure)
 - **vLOC**: Verified Lines of Code
 - **Verification Rate**: vLOC / total LOC
 
