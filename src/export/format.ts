@@ -159,13 +159,13 @@ export const RalphMeterExportSchema = z.object({
 /**
  * Validate an export object
  */
-export function validateExport(data: unknown): RalphMeterExport {
+export function validateExport(data: unknown) {
   return RalphMeterExportSchema.parse(data);
 }
 
 /**
  * Safely validate an export object
  */
-export function safeValidateExport(data: unknown): z.SafeParseReturnType<unknown, RalphMeterExport> {
+export function safeValidateExport(data: unknown) {
   return RalphMeterExportSchema.safeParse(data);
 }

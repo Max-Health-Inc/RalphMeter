@@ -651,6 +651,7 @@ describe('RalphMeterServer', () => {
       // 2. Record some gate results (via the gate tracker directly)
       const gateTracker = server.getGateTracker();
       gateTracker.record(sessionId, {
+        timestamp: new Date().toISOString(),
         gate: 'G1_COMPILE',
         filePath: 'test.ts',
         lineResults: [

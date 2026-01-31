@@ -193,6 +193,7 @@ describe('Export Module', () => {
 
       // Record some gate results
       gateTracker.record(sessionId, {
+        timestamp: validTimestamp,
         gate: 'G1_COMPILE',
         filePath: 'test.ts',
         lineResults: [
