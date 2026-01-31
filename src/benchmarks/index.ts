@@ -16,3 +16,13 @@ export {
   listBenchmarks,
   validateBenchmark,
 } from './loader.js';
+
+export type {
+  MetricComparison,
+  EfficiencyScore,
+  Recommendation,
+  ComparisonReport,
+  ComparisonError,
+} from './comparison.js';
+
+export { BenchmarkComparison } from './comparison.js';

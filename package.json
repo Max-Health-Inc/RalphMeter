@@ -9,7 +9,7 @@
   },
   "scripts": {
     "dev": "tsx watch src/index.ts",
-    "build": "tsc",
+    "build": "tsc && cp -r src/benchmarks/references dist/benchmarks/",
     "test": "vitest",
     "test:run": "vitest run",
     "lint": "eslint src/",
