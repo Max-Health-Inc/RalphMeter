@@ -20,3 +20,6 @@ export * from './integrations/index.js';
 
 // Export benchmarks
 export * from './benchmarks/index.js';
+
+// Export export module
+export * from './export/index.js';

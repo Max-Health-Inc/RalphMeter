@@ -18,6 +18,7 @@ import {
   safeValidateEvent,
   type MeterEvent 
 } from '../core/events.js';
+import { exportSession as exportSessionData } from '../export/exporter.js';
 
 // ============================================================================
 // Types
@@ -178,6 +179,12 @@ export class RalphMeterServer {
     this.app.get(
       '/api/sessions/:id/metrics',
       this.asyncHandler(this.getMetrics.bind(this))
+    );
+
+    // GET /api/sessions/:id/export - export session data
+    this.app.get(
+      '/api/sessions/:id/export',
+      this.asyncHandler(this.exportSession.bind(this))
     );
   }
 
@@ -461,6 +468,58 @@ export class RalphMeterServer {
         basicMetrics,
       });
     }
+  }
+
+  /**
+   * GET /api/sessions/:id/export - Export session data
+   */
+  private exportSession(req: Request, res: Response): void {
+    const sessionId = req.params['id'];
+
+    if (sessionId === undefined || typeof sessionId !== 'string') {
+      res.status(400).json({
+        error: 'Session ID is required',
+        code: 'MISSING_SESSION_ID',
+      } satisfies ApiError);
+      return;
+    }
+
+    // Validate query parameters
+    const queryResult = MetricsQuerySchema.safeParse(req.query);
+    if (!queryResult.success) {
+      res.status(400).json({
+        error: 'Invalid query parameters',
+        code: 'VALIDATION_ERROR',
+        details: queryResult.error.issues,
+      } satisfies ApiError);
+      return;
+    }
+
+    const { rootPath } = queryResult.data;
+
+    // Export the session
+    const exportResult = exportSessionData(
+      sessionId,
+      {
+        collector: this.collector,
+        gateTracker: this.gateTracker,
+        locCounter: this.locCounter,
+        metricsCalculator: this.metricsCalculator,
+      },
+      rootPath
+    );
+
+    if (!exportResult.ok) {
+      const statusCode = exportResult.error.code === 'SESSION_NOT_FOUND' ? 404 : 500;
+      res.status(statusCode).json({
+        error: exportResult.error.message,
+        code: exportResult.error.code,
+        details: exportResult.error.details,
+      } satisfies ApiError);
+      return;
+    }
+
+    res.json(exportResult.value);
   }
 
   /**

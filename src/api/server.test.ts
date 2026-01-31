@@ -549,4 +549,125 @@ describe('RalphMeterServer', () => {
       });
     });
   });
+
+  // ============================================================================
+  // GET /api/sessions/:id/export
+  // ============================================================================
+
+  describe('GET /api/sessions/:id/export', () => {
+    it('should export session data without rootPath', async () => {
+      // 1. Create a session
+      const createResponse = await request.post('/api/sessions').send({});
+      const sessionId = createResponse.body.sessionId as string;
+
+      // 2. Add some events
+      await request.post(`/api/sessions/${sessionId}/events`).send({
+        event: {
+          timestamp: new Date().toISOString(),
+          sessionId,
+          eventType: 'tokens_in',
+          payload: { count: 100 },
+        },
+      });
+
+      await request.post(`/api/sessions/${sessionId}/events`).send({
+        event: {
+          timestamp: new Date().toISOString(),
+          sessionId,
+          eventType: 'tokens_out',
+          payload: { count: 200 },
+        },
+      });
+
+      // 3. Export without rootPath
+      const response = await request.get(`/api/sessions/${sessionId}/export`);
+
+      expect(response.status).toBe(200);
+      expect(response.body).toMatchObject({
+        version: 'v1',
+        sessionMetadata: {
+          id: sessionId,
+          status: 'active',
+        },
+      });
+      expect(response.body.exportedAt).toBeDefined();
+      expect(response.body.allEvents).toHaveLength(3); // session_start + 2 token events
+      expect(response.body.sessionMetrics).toBeTruthy();
+      expect(response.body.sessionMetrics.totalTokensIn).toBe(100);
+      expect(response.body.sessionMetrics.totalTokensOut).toBe(200);
+      expect(response.body.computedMetrics).toBeNull();
+      expect(response.body.locBreakdown).toBeNull();
+      expect(response.body.synthTrend).toEqual([]);
+    });
+
+    it('should export session data with rootPath', async () => {
+      // 1. Create a session
+      const createResponse = await request.post('/api/sessions').send({});
+      const sessionId = createResponse.body.sessionId as string;
+
+      // 2. Add some events
+      await request.post(`/api/sessions/${sessionId}/events`).send({
+        event: {
+          timestamp: new Date().toISOString(),
+          sessionId,
+          eventType: 'tokens_in',
+          payload: { count: 100 },
+        },
+      });
+
+      // 3. Export with rootPath
+      const response = await request
+        .get(`/api/sessions/${sessionId}/export`)
+        .query({ rootPath: process.cwd() });
+
+      expect(response.status).toBe(200);
+      expect(response.body).toMatchObject({
+        version: 'v1',
+        sessionMetadata: {
+          id: sessionId,
+          status: 'active',
+        },
+      });
+      expect(response.body.computedMetrics).toBeTruthy();
+      expect(response.body.locBreakdown).toBeTruthy();
+      expect(response.body.computedMetrics.totalLOC).toBeGreaterThan(0);
+      expect(response.body.locBreakdown.total).toBeGreaterThan(0);
+    });
+
+    it('should return 404 for non-existent session', async () => {
+      const response = await request.get(
+        '/api/sessions/00000000-0000-0000-0000-000000000000/export'
+      );
+
+      expect(response.status).toBe(404);
+      expect(response.body.code).toBe('SESSION_NOT_FOUND');
+    });
+
+    it('should include gate history when gates are recorded', async () => {
+      // 1. Create a session
+      const createResponse = await request.post('/api/sessions').send({});
+      const sessionId = createResponse.body.sessionId as string;
+
+      // 2. Record some gate results (via the gate tracker directly)
+      const gateTracker = server.getGateTracker();
+      gateTracker.record(sessionId, {
+        timestamp: new Date().toISOString(),
+        gate: 'G1_COMPILE',
+        filePath: 'test.ts',
+        lineResults: [
+          { lineNumber: 1, passed: true },
+          { lineNumber: 2, passed: false, errorMessage: 'Type error' },
+        ],
+      });
+
+      // 3. Export the session
+      const response = await request.get(`/api/sessions/${sessionId}/export`);
+
+      expect(response.status).toBe(200);
+      expect(response.body.gateHistory).toBeTruthy();
+      expect(response.body.gateHistory.totalLinesChecked).toBe(2);
+      expect(response.body.gateHistory.perGate).toBeTruthy();
+      expect(response.body.gateHistory.perGate.G1_COMPILE).toBeTruthy();
+    });
+  });
 });

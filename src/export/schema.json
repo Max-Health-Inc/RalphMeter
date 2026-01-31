@@ -1,0 +1,374 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://ralphmeter.dev/schemas/export/v1.json",
+  "title": "RalphMeter Export Format",
+  "description": "Standardized export format for RalphMeter session data",
+  "type": "object",
+  "required": [
+    "version",
+    "exportedAt",
+    "sessionMetadata",
+    "allEvents",
+    "computedMetrics",
+    "gateHistory",
+    "locBreakdown",
+    "sessionMetrics",
+    "synthTrend"
+  ],
+  "properties": {
+    "version": {
+      "type": "string",
+      "enum": ["v1"],
+      "description": "Format version for backward compatibility"
+    },
+    "exportedAt": {
+      "type": "string",
+      "format": "date-time",
+      "description": "ISO 8601 timestamp when the export was generated"
+    },
+    "sessionMetadata": {
+      "type": "object",
+      "required": ["id", "status", "startedAt"],
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique session identifier"
+        },
+        "status": {
+          "type": "string",
+          "enum": ["active", "completed", "failed"],
+          "description": "Current session status"
+        },
+        "startedAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "When the session started"
+        },
+        "endedAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "When the session ended (if completed)"
+        },
+        "success": {
+          "type": "boolean",
+          "description": "Whether the session completed successfully"
+        },
+        "tags": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "string"
+          },
+          "description": "Optional tags for arbitrary metadata"
+        }
+      }
+    },
+    "allEvents": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "description": "Meter events (session_start, iteration_start, etc.)"
+      },
+      "description": "All events collected during the session"
+    },
+    "computedMetrics": {
+      "oneOf": [
+        {
+          "type": "null"
+        },
+        {
+          "type": "object",
+          "required": [
+            "verifiedLOC",
+            "totalLOC",
+            "verificationRate",
+            "locPerMinute",
+            "vlocPerMinute",
+            "tokensPerLOC",
+            "poeLOC",
+            "totalMinutes",
+            "totalTokens",
+            "codeLines",
+            "commentLines",
+            "blankLines"
+          ],
+          "properties": {
+            "verifiedLOC": {
+              "type": "number",
+              "description": "Total verified lines of code (passed all applicable gates)"
+            },
+            "totalLOC": {
+              "type": "number",
+              "description": "Total lines of code in the codebase"
+            },
+            "verificationRate": {
+              "type": "number",
+              "description": "Verification rate: verifiedLOC / totalLOC (0-1)"
+            },
+            "locPerMinute": {
+              "type": "number",
+              "description": "Lines of code per minute"
+            },
+            "vlocPerMinute": {
+              "type": "number",
+              "description": "Verified lines of code per minute"
+            },
+            "tokensPerLOC": {
+              "type": "number",
+              "description": "Tokens per LOC (Ralph): Cumulative tokens / Current LOC"
+            },
+            "poeLOC": {
+              "type": "number",
+              "description": "PoE-LOC: Probability of error per line of code"
+            },
+            "totalMinutes": {
+              "type": "number",
+              "description": "Total session duration in minutes"
+            },
+            "totalTokens": {
+              "type": "number",
+              "description": "Total tokens consumed (in + out)"
+            },
+            "codeLines": {
+              "type": "number",
+              "description": "Code lines only (excludes comments and blanks)"
+            },
+            "commentLines": {
+              "type": "number",
+              "description": "Comment lines"
+            },
+            "blankLines": {
+              "type": "number",
+              "description": "Blank lines"
+            }
+          }
+        }
+      ],
+      "description": "Computed efficiency metrics (null if not calculated)"
+    },
+    "gateHistory": {
+      "oneOf": [
+        {
+          "type": "null"
+        },
+        {
+          "type": "object",
+          "required": [
+            "perGate",
+            "totalLinesChecked",
+            "verifiedLines",
+            "overallPoE"
+          ],
+          "properties": {
+            "perGate": {
+              "type": "object",
+              "properties": {
+                "G1_COMPILE": {
+                  "$ref": "#/definitions/gateStats"
+                },
+                "G2_CORRECT": {
+                  "$ref": "#/definitions/gateStats"
+                },
+                "G3_REACHABLE": {
+                  "$ref": "#/definitions/gateStats"
+                }
+              }
+            },
+            "totalLinesChecked": {
+              "type": "number",
+              "description": "Total unique lines checked across all gates"
+            },
+            "verifiedLines": {
+              "type": "number",
+              "description": "Lines that passed all applicable gates"
+            },
+            "overallPoE": {
+              "type": "number",
+              "description": "Overall probability of error across all gates"
+            }
+          }
+        }
+      ],
+      "description": "Gate verification history (null if no gate data)"
+    },
+    "locBreakdown": {
+      "oneOf": [
+        {
+          "type": "null"
+        },
+        {
+          "type": "object",
+          "required": ["total", "code", "comments", "blank"],
+          "properties": {
+            "total": {
+              "type": "number",
+              "description": "Total number of lines"
+            },
+            "code": {
+              "type": "number",
+              "description": "Number of code lines (non-blank, non-comment)"
+            },
+            "comments": {
+              "type": "number",
+              "description": "Number of comment lines"
+            },
+            "blank": {
+              "type": "number",
+              "description": "Number of blank lines"
+            }
+          }
+        }
+      ],
+      "description": "LOC breakdown by category (null if not calculated)"
+    },
+    "sessionMetrics": {
+      "oneOf": [
+        {
+          "type": "null"
+        },
+        {
+          "type": "object",
+          "required": [
+            "totalIterations",
+            "totalTokensIn",
+            "totalTokensOut",
+            "compilationAttempts",
+            "compilationSuccesses",
+            "testAttempts",
+            "testSuccesses",
+            "storiesCompleted",
+            "storiesPassed"
+          ],
+          "properties": {
+            "totalIterations": {
+              "type": "number",
+              "description": "Total iterations in the session"
+            },
+            "totalTokensIn": {
+              "type": "number",
+              "description": "Total input tokens consumed"
+            },
+            "totalTokensOut": {
+              "type": "number",
+              "description": "Total output tokens generated"
+            },
+            "compilationAttempts": {
+              "type": "number",
+              "description": "Number of compilation attempts"
+            },
+            "compilationSuccesses": {
+              "type": "number",
+              "description": "Number of successful compilations"
+            },
+            "testAttempts": {
+              "type": "number",
+              "description": "Number of test run attempts"
+            },
+            "testSuccesses": {
+              "type": "number",
+              "description": "Number of successful test runs"
+            },
+            "storiesCompleted": {
+              "type": "number",
+              "description": "Stories completed in this session"
+            },
+            "storiesPassed": {
+              "type": "number",
+              "description": "Stories that passed all gates"
+            }
+          }
+        }
+      ],
+      "description": "Basic metrics calculated from session events"
+    },
+    "synthTrend": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "storyId",
+          "timestamp",
+          "cumulativeTokens",
+          "loc",
+          "Ralph",
+          "synthDelta",
+          "tokensSpent",
+          "linesAdded",
+          "linesDeleted",
+          "netDelta"
+        ],
+        "properties": {
+          "storyId": {
+            "type": "string",
+            "description": "Story ID that triggered this measurement"
+          },
+          "timestamp": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Timestamp of measurement"
+          },
+          "cumulativeTokens": {
+            "type": "number",
+            "description": "Cumulative tokens at this point"
+          },
+          "loc": {
+            "type": "number",
+            "description": "LOC at this point"
+          },
+          "Ralph": {
+            "type": "number",
+            "description": "Ralph value at this point (tokens / LOC)"
+          },
+          "synthDelta": {
+            "type": "number",
+            "description": "Delta from previous measurement"
+          },
+          "tokensSpent": {
+            "type": "number",
+            "description": "Tokens spent on this story"
+          },
+          "linesAdded": {
+            "type": "number",
+            "description": "Lines added in this story"
+          },
+          "linesDeleted": {
+            "type": "number",
+            "description": "Lines deleted in this story"
+          },
+          "netDelta": {
+            "type": "number",
+            "description": "Net delta (linesAdded - linesDeleted)"
+          },
+          "storySynth": {
+            "type": "number",
+            "description": "Story-specific Ralph (tokensSpent / linesAdded), undefined if no lines added"
+          }
+        }
+      },
+      "description": "Ralph trend over time (empty if not calculated)"
+    }
+  },
+  "definitions": {
+    "gateStats": {
+      "type": "object",
+      "required": ["linesChecked", "linesPassed", "passRate", "poe"],
+      "properties": {
+        "linesChecked": {
+          "type": "number",
+          "description": "Number of lines checked by this gate"
+        },
+        "linesPassed": {
+          "type": "number",
+          "description": "Number of lines that passed this gate"
+        },
+        "passRate": {
+          "type": "number",
+          "description": "Pass rate (linesPassed / linesChecked), or 1 if no lines checked"
+        },
+        "poe": {
+          "type": "number",
+          "description": "Probability of error (1 - passRate)"
+        }
+      }
+    }
+  }
+}
