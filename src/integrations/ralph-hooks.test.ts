@@ -7,7 +7,6 @@ import express, { type Express, type Request, type Response } from 'express';
 import type { Server } from 'node:http';
 import {
   createRalphHooks,
-  type RalphHooks,
   type SessionStartParams,
   type SessionEndParams,
   type IterationStartParams,
@@ -62,7 +61,7 @@ describe('RalphHooks', () => {
       server = app.listen(0, () => {
         const address = server.address();
         if (address !== null && typeof address !== 'string') {
-          meterUrl = `http://localhost:${address.port}`;
+          meterUrl = `http://localhost:${String(address.port)}`;
         }
         resolve();
       });
@@ -347,12 +346,12 @@ describe('RalphHooks', () => {
         payload: {
           success: boolean;
           errorCount?: number;
-          errors?: Array<{
+          errors?: {
             file: string;
             line: number;
             column?: number;
             message: string;
-          }>;
+          }[];
         };
       };
       expect(event.eventType).toBe('compilation_result');
@@ -393,12 +392,12 @@ describe('RalphHooks', () => {
         payload: {
           success: boolean;
           errorCount?: number;
-          errors?: Array<{
+          errors?: {
             file: string;
             line: number;
             column?: number;
             message: string;
-          }>;
+          }[];
         };
       };
       expect(event.eventType).toBe('compilation_result');
@@ -647,7 +646,7 @@ describe('RalphHooks', () => {
       const address = slowServer.address();
       const slowUrl =
         address !== null && typeof address !== 'string'
-          ? `http://localhost:${address.port}`
+          ? `http://localhost:${String(address.port)}`
           : '';
 
       const hooks = createRalphHooks({

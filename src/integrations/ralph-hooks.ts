@@ -100,12 +100,12 @@ export interface CompilationParams {
   /** Number of errors (if failed) */
   errorCount?: number;
   /** Error messages (if failed) */
-  errors?: Array<{
+  errors?: {
     file: string;
     line: number;
     column?: number;
     message: string;
-  }>;
+  }[];
 }
 
 /**
@@ -259,7 +259,7 @@ export function createRalphHooks(
       if (!response.ok) {
         const errorText = await response.text();
         throw new Error(
-          `API request failed: ${response.status} ${response.statusText} - ${errorText}`
+          `API request failed: ${String(response.status)} ${response.statusText} - ${errorText}`
         );
       }
 
@@ -270,7 +270,7 @@ export function createRalphHooks(
       if (error instanceof Error) {
         if (error.name === 'AbortError') {
           console.error(
-            `[RalphHooks] Request timeout after ${timeout}ms for ${event.eventType}`
+            `[RalphHooks] Request timeout after ${String(timeout)}ms for ${event.eventType}`
           );
         } else {
           console.error(
@@ -315,7 +315,7 @@ export function createRalphHooks(
       if (!response.ok) {
         const errorText = await response.text();
         throw new Error(
-          `Failed to create session: ${response.status} ${response.statusText} - ${errorText}`
+          `Failed to create session: ${String(response.status)} ${response.statusText} - ${errorText}`
         );
       }
 
@@ -332,7 +332,7 @@ export function createRalphHooks(
       if (error instanceof Error) {
         if (error.name === 'AbortError') {
           console.error(
-            `[RalphHooks] Session creation timeout after ${timeout}ms`
+            `[RalphHooks] Session creation timeout after ${String(timeout)}ms`
           );
         } else {
           console.error('[RalphHooks] Failed to create session:', error.message);
