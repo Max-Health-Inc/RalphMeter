@@ -50,7 +50,7 @@ After Story 3: 14,400 tokens,  180 LOC → Synth = 80 ⚠️ spike!
 | Synth spike | Problem story — tokens burned, little LOC added |
 | Synth flat | Steady progress |
 
-**Key insight:** LOC is measured as a codebase snapshot (not deltas). Synth = cumulative tokens / current LOC. Spikes reveal problem stories without complex delta math.
+LOC is measured as a codebase snapshot. Synth = cumulative tokens / current LOC. Spikes reveal problem stories; per-story deltas enable drill-down analysis.
 
 ## The 3-Gate Model
 
