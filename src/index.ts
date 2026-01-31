@@ -14,3 +14,6 @@ export * from './schemas/index.js';
 
 // Export shared utilities
 export * from './shared/index.js';
+
+// Export integrations
+export * from './integrations/index.js';

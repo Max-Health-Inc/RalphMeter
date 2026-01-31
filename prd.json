@@ -155,7 +155,7 @@
         "Include integration test with mock server"
       ],
       "priority": 7,
-      "passes": false,
+      "passes": true,
       "notes": "This is how Ralph feeds data into the meter."
     },
     {
