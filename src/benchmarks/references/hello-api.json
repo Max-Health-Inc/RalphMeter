@@ -1,0 +1,33 @@
+{
+  "project": "HelloAPI",
+  "branchName": "main",
+  "description": "A trivial Hello World REST API with a single GET endpoint",
+  "userStories": [
+    {
+      "id": "HELLO-001",
+      "title": "Hello Endpoint",
+      "description": "Create a simple Express API with a GET /hello endpoint that returns a greeting",
+      "acceptanceCriteria": [
+        "Create Express server on port 3000",
+        "GET /hello endpoint returns JSON { message: 'Hello, World!' }",
+        "GET /hello/:name endpoint returns JSON { message: 'Hello, {name}!' }",
+        "Server starts without errors",
+        "Tests pass for both endpoints"
+      ],
+      "priority": 1,
+      "passes": false,
+      "notes": "Minimal REST API - one file implementation expected"
+    }
+  ],
+  "metadata": {
+    "expectedLOC": {
+      "min": 30,
+      "max": 70
+    },
+    "complexityScore": 1,
+    "expectedIterations": {
+      "min": 1,
+      "max": 3
+    }
+  }
+}

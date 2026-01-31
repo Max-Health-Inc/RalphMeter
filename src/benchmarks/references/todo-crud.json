@@ -1,0 +1,124 @@
+{
+  "project": "TodoCRUD",
+  "branchName": "main",
+  "description": "A medium complexity Todo API with full CRUD operations, validation, and persistence",
+  "userStories": [
+    {
+      "id": "TODO-001",
+      "title": "Setup Project Structure",
+      "description": "Initialize Express TypeScript project with proper structure",
+      "acceptanceCriteria": [
+        "Express server with TypeScript",
+        "Basic project structure: src/routes, src/models, src/middleware",
+        "Environment configuration",
+        "Error handling middleware",
+        "Server starts on configured port"
+      ],
+      "priority": 1,
+      "passes": false,
+      "notes": "Foundation for CRUD operations"
+    },
+    {
+      "id": "TODO-002",
+      "title": "Todo Data Model",
+      "description": "Define Todo model with validation",
+      "acceptanceCriteria": [
+        "Todo interface: id, title, description, completed, createdAt, updatedAt",
+        "Zod schema for validation",
+        "In-memory storage initially (array)",
+        "Type exports"
+      ],
+      "priority": 2,
+      "passes": false,
+      "notes": "Simple in-memory persistence acceptable"
+    },
+    {
+      "id": "TODO-003",
+      "title": "Create Todo Endpoint",
+      "description": "POST /api/todos - Create new todo item",
+      "acceptanceCriteria": [
+        "POST /api/todos accepts { title, description }",
+        "Validates input using Zod schema",
+        "Generates unique ID",
+        "Sets completed: false, createdAt, updatedAt",
+        "Returns 201 with created todo",
+        "Returns 400 for invalid input",
+        "Tests pass"
+      ],
+      "priority": 3,
+      "passes": false,
+      "notes": "First CRUD operation"
+    },
+    {
+      "id": "TODO-004",
+      "title": "List and Get Todo Endpoints",
+      "description": "GET /api/todos and GET /api/todos/:id",
+      "acceptanceCriteria": [
+        "GET /api/todos returns array of all todos",
+        "GET /api/todos/:id returns single todo",
+        "Returns 404 if todo not found",
+        "Tests pass for both endpoints"
+      ],
+      "priority": 4,
+      "passes": false,
+      "notes": "Read operations"
+    },
+    {
+      "id": "TODO-005",
+      "title": "Update Todo Endpoint",
+      "description": "PUT /api/todos/:id - Update existing todo",
+      "acceptanceCriteria": [
+        "PUT /api/todos/:id accepts partial update { title?, description?, completed? }",
+        "Validates input",
+        "Updates updatedAt timestamp",
+        "Returns 200 with updated todo",
+        "Returns 404 if todo not found",
+        "Returns 400 for invalid input",
+        "Tests pass"
+      ],
+      "priority": 5,
+      "passes": false,
+      "notes": "Update operation"
+    },
+    {
+      "id": "TODO-006",
+      "title": "Delete Todo Endpoint",
+      "description": "DELETE /api/todos/:id - Remove todo item",
+      "acceptanceCriteria": [
+        "DELETE /api/todos/:id removes todo from storage",
+        "Returns 204 on success",
+        "Returns 404 if todo not found",
+        "Tests pass"
+      ],
+      "priority": 6,
+      "passes": false,
+      "notes": "Delete operation completes CRUD"
+    },
+    {
+      "id": "TODO-007",
+      "title": "Filter and Sort",
+      "description": "Add query parameters for filtering and sorting todos",
+      "acceptanceCriteria": [
+        "GET /api/todos?completed=true filters by completion status",
+        "GET /api/todos?sort=createdAt sorts by field",
+        "GET /api/todos?order=desc sets sort order",
+        "Supports combinations of filters",
+        "Tests pass"
+      ],
+      "priority": 7,
+      "passes": false,
+      "notes": "Enhanced list functionality"
+    }
+  ],
+  "metadata": {
+    "expectedLOC": {
+      "min": 150,
+      "max": 250
+    },
+    "complexityScore": 5,
+    "expectedIterations": {
+      "min": 3,
+      "max": 8
+    }
+  }
+}

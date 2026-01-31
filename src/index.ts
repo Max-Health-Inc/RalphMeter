@@ -17,3 +17,6 @@ export * from './shared/index.js';
 
 // Export integrations
 export * from './integrations/index.js';
+
+// Export benchmarks
+export * from './benchmarks/index.js';
