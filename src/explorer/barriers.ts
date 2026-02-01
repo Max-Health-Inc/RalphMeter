@@ -82,7 +82,7 @@ export class BarrierTracker {
       if (this.isBarrierStatus(response.status)) {
         this.barriers.push({
           url: response.url,
-          status: response.status as BarrierType,
+          status: response.status,
           method: response.method,
           timestamp: response.timestamp,
         });
@@ -225,7 +225,12 @@ export class BarrierTracker {
     ];
 
     // Build possible file paths
-    const filename = segments[segments.length - 1];
+    // We know segments.length > 0 from check above
+    const lastSegment = segments[segments.length - 1];
+    if (lastSegment === undefined) {
+      return paths;
+    }
+    const filename = lastSegment;
     const dirname = segments.slice(0, -1).join('/');
 
     for (const pattern of patterns) {
