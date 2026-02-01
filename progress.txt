@@ -324,3 +324,27 @@ it passes ALL applicable gates. Dead code and untested code are properly exclude
   - Password values are masked in action logs (shown as '***') for security
   - Login form submission triggers navigation which requires waitForLoadState
 ---
+
+## 2026-02-01 - US-016
+- Implemented: G3 Reachability Report
+- Files changed:
+  - Created src/explorer/report.ts - ReachabilityReport class for generating comprehensive G3 reachability reports
+  - Created src/explorer/report.test.ts - 21 comprehensive tests covering all report generation scenarios
+  - Modified src/explorer/index.ts - Added report exports to module barrel
+  - Modified src/types/index.ts - Added report type re-exports for public API
+  - Modified src/api/server.ts - Added POST /api/sessions/:id/reachability endpoint with ReachabilityReport integration
+  - Modified src/api/server.test.ts - Added 5 comprehensive tests for reachability endpoint
+  - Modified prd.json - Marked US-016 as passes: true
+- **Learnings for future iterations:**
+  - ReachabilityReport combines coverage data with barrier analysis to categorize code reachability
+  - Categories are: exercised (G3 PASS), authGated (G3 UNKNOWN - 401), permissionGated (G3 UNKNOWN - 403), paywallGated (G3 UNKNOWN - 402), unreached (G3 FAIL)
+  - Recommendations are generated based on percentages: >80% exercised = excellent, >60% = good, <60% = low
+  - Auth-gated and permission-gated code gets actionable recommendations to provide credentials
+  - Unreached code >20% gets warning about potential dead code, 10-19% gets info note
+  - Avoid naming collisions: benchmarks/comparison.ts and explorer/report.ts both had Recommendation type - renamed explorer's to ReachabilityRecommendation
+  - Report formatting uses box-drawing characters (╔═╗║╚╝) for clear visual presentation
+  - Line categorization uses file:line key matching to map notExecuted lines to barrier categories
+  - Zero division protection: when total is 0, all percentages return 0 (not NaN or undefined)
+  - The endpoint accepts coverage and barrier data as POST body for flexibility in exploration workflows
+  - TypeScript type assertions (as CoverageData, as BarrierAnalysis) needed when Zod parsing returns unknown types
+---

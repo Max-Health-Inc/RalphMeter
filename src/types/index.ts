@@ -54,3 +54,12 @@ export type {
   BarrierAnalysis,
   PathInferenceOptions,
 } from '../explorer/barriers.js';
+
+export type {
+  ReachabilityCategory,
+  CategorizedLines,
+  ReachabilityStats,
+  RecommendationType,
+  ReachabilityRecommendation,
+  ReachabilityReportData,
+} from '../explorer/report.js';

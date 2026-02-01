@@ -20,6 +20,9 @@ import { LOCCounter } from '../core/loc.js';
 import { MetricsCalculator } from '../core/metrics.js';
 import { safeValidateEvent, type MeterEvent } from '../core/events.js';
 import { exportSession as exportSessionData } from '../export/exporter.js';
+import { ReachabilityReport } from '../explorer/report.js';
+import type { CoverageData } from '../explorer/coverage.js';
+import type { BarrierAnalysis } from '../explorer/barriers.js';
 
 // ============================================================================
 // Types
@@ -56,6 +59,47 @@ const MetricsQuerySchema = z.object({
 });
 
 /**
+ * Reachability report request body
+ */
+const ReachabilityRequestSchema = z.object({
+  coverage: z.object({
+    executed: z.array(
+      z.object({
+        filePath: z.string(),
+        lineNumber: z.number(),
+      })
+    ),
+    notExecuted: z.array(
+      z.object({
+        filePath: z.string(),
+        lineNumber: z.number(),
+      })
+    ),
+  }),
+  barriers: z.object({
+    authGated: z.array(
+      z.object({
+        filePath: z.string(),
+        lineNumber: z.number(),
+      })
+    ),
+    permissionGated: z.array(
+      z.object({
+        filePath: z.string(),
+        lineNumber: z.number(),
+      })
+    ),
+    paywallGated: z.array(
+      z.object({
+        filePath: z.string(),
+        lineNumber: z.number(),
+      })
+    ),
+    barriers: z.array(z.unknown()),
+  }),
+});
+
+/**
  * Session creation response
  */
 interface CreateSessionResponse {
@@ -77,6 +121,7 @@ export class RalphMeterServer {
   private gateTracker: GateTracker;
   private locCounter: LOCCounter;
   private metricsCalculator: MetricsCalculator;
+  private reachabilityReport: ReachabilityReport;
 
   constructor() {
     this.app = express();
@@ -88,6 +133,7 @@ export class RalphMeterServer {
       this.gateTracker,
       this.locCounter
     );
+    this.reachabilityReport = new ReachabilityReport();
 
     this.setupMiddleware();
     this.setupRoutes();
@@ -186,6 +232,12 @@ export class RalphMeterServer {
     this.app.get(
       '/api/sessions/:id/export',
       this.asyncHandler(this.exportSession.bind(this))
+    );
+
+    // POST /api/sessions/:id/reachability - generate reachability report
+    this.app.post(
+      '/api/sessions/:id/reachability',
+      this.asyncHandler(this.getReachability.bind(this))
     );
   }
 
@@ -531,6 +583,52 @@ export class RalphMeterServer {
     }
 
     res.json(exportResult.value);
+  }
+
+  /**
+   * POST /api/sessions/:id/reachability - Generate reachability report
+   */
+  private getReachability(req: Request, res: Response): void {
+    const sessionId = req.params['id'];
+
+    if (sessionId === undefined || typeof sessionId !== 'string') {
+      res.status(400).json({
+        error: 'Session ID is required',
+        code: 'MISSING_SESSION_ID',
+      } satisfies ApiError);
+      return;
+    }
+
+    // Verify session exists
+    const sessionResult = this.collector.getSession(sessionId);
+    if (!sessionResult.ok) {
+      res.status(404).json({
+        error: 'Session not found',
+        code: 'SESSION_NOT_FOUND',
+      } satisfies ApiError);
+      return;
+    }
+
+    // Validate request body
+    const bodyResult = ReachabilityRequestSchema.safeParse(req.body);
+    if (!bodyResult.success) {
+      res.status(400).json({
+        error: 'Invalid request body',
+        code: 'VALIDATION_ERROR',
+        details: bodyResult.error.issues,
+      } satisfies ApiError);
+      return;
+    }
+
+    const { coverage, barriers } = bodyResult.data;
+
+    // Generate the reachability report
+    const report = this.reachabilityReport.generate(
+      coverage as CoverageData,
+      barriers as BarrierAnalysis
+    );
+
+    res.json(report);
   }
 
   /**
