@@ -50,7 +50,7 @@ async function statusCommand(options: { url?: string }): Promise<void> {
     }
 
     const data = (await response.json()) as {
-      sessions: Array<{
+      sessions: {
         sessionId: string;
         status: string;
         startedAt: string;
@@ -58,7 +58,7 @@ async function statusCommand(options: { url?: string }): Promise<void> {
         success?: boolean;
         tags?: Record<string, string>;
         eventCount: number;
-      }>;
+      }[];
       count: number;
     };
 

@@ -217,3 +217,30 @@ it passes ALL applicable gates. Dead code and untested code are properly exclude
   - Export without rootPath only includes session metadata, events, and basic session metrics
 
 ---
+
+## 2026-02-01 - US-012
+- Implemented: AI Explorer - Coverage Instrumentation
+- Files changed:
+  - Created src/explorer/ directory - AI Explorer module for G3 reachability
+  - Created src/explorer/coverage.ts - CoverageCollector class for V8/c8 runtime coverage
+  - Created src/explorer/test-fixtures/sample-app.js - Sample app for testing coverage
+  - Created src/explorer/coverage.test.ts - Comprehensive tests (19 tests)
+  - Created src/explorer/index.ts - Barrel exports for explorer module
+  - Modified src/index.ts - Added explorer module to main exports
+  - Modified src/types/index.ts - Added Line, CoverageData, InstrumentedOptions types
+  - Modified .gitignore - Added coverage temp directories
+  - Modified prd.json - Marked US-012 as passes: true
+  - Modified package.json - Added c8 as a dependency
+- **Learnings for future iterations:**
+  - c8 is the best tool for V8 coverage instrumentation in Node.js apps
+  - Coverage data needs time to be written - wait 1 second after process exit before parsing
+  - Process.exitCode should be checked to handle already-exited processes
+  - Coverage file format is Istanbul-compatible JSON with statementMap and execution counts
+  - Use `npx c8` with command wrapping: `npx c8 [options] node app.js`
+  - Include/exclude patterns control what code is instrumented
+  - Coverage temp directories should be in .gitignore to avoid committing test artifacts
+  - Line-level coverage maps statement execution counts to specific line numbers
+  - Empty strings need explicit trim() check before split() for proper validation
+  - Race conditions exist between process exit and coverage file writing - always add delay
+
+---
