@@ -38,6 +38,7 @@ export class SecurityGate implements Gate {
    * Performs security scanning
    * This is a stub - production would integrate with Semgrep, Snyk, etc.
    */
+  // eslint-disable-next-line @typescript-eslint/require-await
   async check(
     artifact: GateArtifact,
     config?: Record<string, unknown>

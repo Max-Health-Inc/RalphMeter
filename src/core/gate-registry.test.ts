@@ -10,7 +10,7 @@ import {
   type GateArtifact,
   type GateResult,
 } from './gate-plugin.js';
-import { ok } from '../shared/result.js';
+import { ok, type Result } from '../shared/result.js';
 
 // Mock gates for testing
 class MockCoreGate implements Gate {
@@ -23,10 +23,11 @@ class MockCoreGate implements Gate {
     return true;
   }
 
+  // eslint-disable-next-line @typescript-eslint/require-await
   async check(
     _artifact: GateArtifact,
     _config?: Record<string, unknown>
-  ): Promise<import('../shared/result.js').Result<GateResult, Error>> {
+  ): Promise<Result<GateResult>> {
     return ok({ pass: true, score: 100 });
   }
 }
@@ -41,10 +42,11 @@ class MockQualityGate implements Gate {
     return true;
   }
 
+  // eslint-disable-next-line @typescript-eslint/require-await
   async check(
     _artifact: GateArtifact,
     _config?: Record<string, unknown>
-  ): Promise<import('../shared/result.js').Result<GateResult, Error>> {
+  ): Promise<Result<GateResult>> {
     return ok({ pass: true, score: 95 });
   }
 }
@@ -59,10 +61,11 @@ class FailingGate implements Gate {
     return true;
   }
 
+  // eslint-disable-next-line @typescript-eslint/require-await
   async check(
     _artifact: GateArtifact,
     _config?: Record<string, unknown>
-  ): Promise<import('../shared/result.js').Result<GateResult, Error>> {
+  ): Promise<Result<GateResult>> {
     return ok({
       pass: false,
       score: 0,
@@ -87,10 +90,11 @@ class ConditionalGate implements Gate {
     return projectMeta.languages.includes('typescript');
   }
 
+  // eslint-disable-next-line @typescript-eslint/require-await
   async check(
     _artifact: GateArtifact,
     _config?: Record<string, unknown>
-  ): Promise<import('../shared/result.js').Result<GateResult, Error>> {
+  ): Promise<Result<GateResult>> {
     return ok({ pass: true, score: 100 });
   }
 }

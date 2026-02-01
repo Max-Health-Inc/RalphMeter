@@ -60,7 +60,7 @@ function createRuntimeCoverageResult(
 // ============================================================================
 
 describe('GateTracker', () => {
-  let tracker: CoreGateTracker;
+  let tracker: GateTracker;
 
   beforeEach(() => {
     tracker = new GateTracker();

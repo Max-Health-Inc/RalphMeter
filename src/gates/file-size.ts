@@ -43,6 +43,7 @@ export class FileSizeGate implements Gate {
   /**
    * Checks file size against maximum threshold
    */
+  // eslint-disable-next-line @typescript-eslint/require-await
   async check(
     artifact: GateArtifact,
     config?: Record<string, unknown>

@@ -47,6 +47,7 @@ export class ComplexityGate implements Gate {
    * Checks complexity using a simple heuristic
    * In production, this would integrate with ESLint or a proper complexity analyzer
    */
+  // eslint-disable-next-line @typescript-eslint/require-await
   async check(
     artifact: GateArtifact,
     config?: Record<string, unknown>
