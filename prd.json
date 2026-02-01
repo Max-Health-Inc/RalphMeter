@@ -189,7 +189,7 @@
         "Typecheck passes"
       ],
       "priority": 9,
-      "passes": false,
+      "passes": true,
       "notes": "Benchmarks provide calibration points for efficiency comparisons."
     },
     {
