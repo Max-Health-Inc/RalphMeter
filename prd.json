@@ -273,7 +273,7 @@
         "Tests pass with mock 401/403 responses"
       ],
       "priority": 14,
-      "passes": false,
+      "passes": true,
       "notes": "Prevents false positives - code behind auth is not dead code."
     },
     {

@@ -275,3 +275,26 @@ it passes ALL applicable gates. Dead code and untested code are properly exclude
   - Install Playwright browsers separately with `npx playwright install chromium`
 
 ---
+
+## 2026-02-01 - US-014
+- Implemented: AI Explorer - Auth Barrier Detection
+- Files changed:
+  - Created src/explorer/barriers.ts - BarrierTracker class for detecting and categorizing authentication/authorization barriers
+  - Created src/explorer/barriers.test.ts - Comprehensive tests (32 tests) covering all barrier detection scenarios
+  - Modified src/explorer/index.ts - Added barrier exports to module barrel
+  - Modified src/types/index.ts - Added barrier type re-exports for public API
+  - Modified prd.json - Marked US-014 as passes: true
+- **Learnings for future iterations:**
+  - Barrier detection focuses on HTTP status codes: 401 (auth), 403 (permission), 402 (paywall)
+  - BarrierTracker provides both detection and categorization of barriers
+  - Path inference uses heuristic mapping from URLs to likely source file locations
+  - Inference patterns check common route handler locations: src/api, src/routes, api, routes, src/controllers
+  - Path inference can be disabled via useHeuristics: false option for cases where heuristics aren't needed
+  - Custom route patterns can be provided for projects with non-standard directory structures
+  - URL parsing handles query parameters, fragments, and nested paths correctly
+  - Root path barriers (/) are skipped in inference as they have no path segments to map
+  - The analyze() method combines detection and inference in a single call for convenience
+  - Barrier tracking prevents false positives in G3 reachability - code behind auth is not dead code
+  - Type guards using 'status is BarrierType' provide type narrowing for status code checks
+  - Array filter with type guards ensures categorized arrays have correct types
+---

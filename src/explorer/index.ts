@@ -15,3 +15,11 @@ export type {
   ExplorationLog,
 } from './surface.js';
 export { SurfaceExplorer } from './surface.js';
+
+export type {
+  BarrierType,
+  BarrierInfo,
+  BarrierAnalysis,
+  PathInferenceOptions,
+} from './barriers.js';
+export { BarrierTracker } from './barriers.js';
