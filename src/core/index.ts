@@ -9,3 +9,5 @@ export * from './collector.js';
 export * from './loc.js';
 export * from './gates.js';
 export * from './metrics.js';
+export * from './gate-plugin.js';
+export * from './gate-registry.js';

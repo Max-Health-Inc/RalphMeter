@@ -348,3 +348,43 @@ it passes ALL applicable gates. Dead code and untested code are properly exclude
   - The endpoint accepts coverage and barrier data as POST body for flexibility in exploration workflows
   - TypeScript type assertions (as CoverageData, as BarrierAnalysis) needed when Zod parsing returns unknown types
 ---
+
+## 2026-02-01 - US-018
+- Implemented: Pluggable Quality Gates
+- Files changed:
+  - Created src/core/gate-plugin.ts - Gate interface defining plugin architecture
+  - Created src/core/gate-registry.ts - GateRegistry class for managing and executing gates
+  - Created src/core/gate-plugin.test.ts - Comprehensive tests (9 tests)
+  - Created src/core/gate-registry.test.ts - Comprehensive tests (19 tests)
+  - Created src/gates/ directory - Built-in quality gate implementations
+  - Created src/gates/file-size.ts - Max LOC per file gate (default 500)
+  - Created src/gates/complexity.ts - Cyclomatic complexity gate (heuristic-based)
+  - Created src/gates/coverage.ts - Test coverage threshold gate (default 80%)
+  - Created src/gates/security.ts - SAST integration stub (eval, hardcoded creds detection)
+  - Created src/gates/file-size.test.ts - 7 tests
+  - Created src/gates/complexity.test.ts - 7 tests
+  - Created src/gates/coverage.test.ts - 7 tests
+  - Created src/gates/security.test.ts - 8 tests
+  - Created src/gates/index.ts - Barrel exports for gates module
+  - Modified src/core/gates.ts - Renamed Gate to CoreGate to avoid naming conflict
+  - Modified src/core/gates.test.ts - Updated to use CoreGate
+  - Modified src/core/index.ts - Added gate-plugin and gate-registry exports
+  - Modified src/index.ts - Added gates module export
+  - Modified prd.json - Marked US-018 as passes: true
+- **Learnings for future iterations:**
+  - Naming conflicts: Renamed core Gate type to CoreGate to avoid collision with plugin Gate interface
+  - TypeScript strict mode with noUncheckedIndexedAccess requires bracket notation for Record<string, unknown> access
+  - Async methods without await need explicit marking or return Promise.resolve()
+  - Gate plugin system uses async check() to support future integration with external tools
+  - Verification modes enable flexible quality requirements: core (G1-G3 only), strict (all gates), custom (selected gates)
+  - File size gate uses simple line count, complexity uses heuristic (production would use ESLint)
+  - Security gate is a stub - production would integrate with Semgrep, Snyk, or similar SAST tools
+  - Coverage gate expects data in artifact.data.coverage with percentage and lines fields
+  - Quality gates are optional - they extend verification but don't replace core G1-G3 gates
+  - GateResult includes pass/fail, optional score (0-100), optional findings array
+  - GateArtifact supports file, codebase, and test-results artifact types
+  - GateFinding includes severity (error/warning/info), file path, optional line number
+  - ProjectMeta determines gate applicability (languages, hasTests, hasExplorableSurface)
+  - GateRegistry manages gate lifecycle: register, unregister, configure, getApplicable, runAll
+  - Core gate types renamed to avoid confusion: Gate → CoreGate, GateConfiguration → CoreGateConfiguration
+---
