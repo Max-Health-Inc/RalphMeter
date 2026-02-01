@@ -301,7 +301,7 @@ export class SessionTimelineGenerator {
     for (let i = 0; i < iterArray.length; i++) {
       const iter = iterArray[i];
       // Array iteration guarantees iter is defined
-       
+
       if (iter === undefined) continue;
 
       const trend = synthTrend.find((t) => t.storyId === iter.storyId);
