@@ -293,6 +293,8 @@ export class SessionTimelineGenerator {
     // Map story completions to iterations
     for (let i = 0; i < iterArray.length; i++) {
       const iter = iterArray[i];
+      // Array iteration guarantees iter is defined
+      // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
       if (iter === undefined) continue;
       
       const trend = synthTrend.find(t => t.storyId === iter.storyId);
