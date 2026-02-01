@@ -253,7 +253,7 @@ describe('SessionDiagnosis', () => {
       if (result.ok) {
         const diag = result.value;
         const efficiencyRec = diag.recommendations.find(
-          r => r.category === 'efficiency'
+          (r) => r.category === 'efficiency'
         );
         expect(efficiencyRec).toBeDefined();
         if (efficiencyRec !== undefined) {
@@ -290,7 +290,7 @@ describe('SessionDiagnosis', () => {
       if (result.ok) {
         const diag = result.value;
         const efficiencyRec = diag.recommendations.find(
-          r => r.category === 'efficiency' && r.message.includes('High token')
+          (r) => r.category === 'efficiency' && r.message.includes('High token')
         );
         expect(efficiencyRec).toBeDefined();
       }
@@ -331,7 +331,7 @@ describe('SessionDiagnosis', () => {
       if (result.ok) {
         const diag = result.value;
         const compilationRec = diag.recommendations.find(
-          r => r.category === 'compilation'
+          (r) => r.category === 'compilation'
         );
         expect(compilationRec).toBeDefined();
         if (compilationRec !== undefined) {
@@ -369,7 +369,7 @@ describe('SessionDiagnosis', () => {
       if (result.ok) {
         const diag = result.value;
         const verificationRec = diag.recommendations.find(
-          r => r.category === 'verification'
+          (r) => r.category === 'verification'
         );
         expect(verificationRec).toBeDefined();
       }

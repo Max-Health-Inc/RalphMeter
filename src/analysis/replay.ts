@@ -212,7 +212,9 @@ export class SessionReplayGenerator {
 
     lines.push('─'.repeat(80));
     lines.push('FINAL STATE:');
-    lines.push(`  Cumulative Tokens: ${String(replay.finalState.cumulativeTokens)}`);
+    lines.push(
+      `  Cumulative Tokens: ${String(replay.finalState.cumulativeTokens)}`
+    );
     if (replay.finalState.lastCompilationSuccess !== undefined) {
       lines.push(
         `  Last Compilation: ${replay.finalState.lastCompilationSuccess ? '✓' : '✗'}`

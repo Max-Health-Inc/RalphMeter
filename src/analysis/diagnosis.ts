@@ -153,10 +153,7 @@ export class SessionDiagnosis {
     );
 
     // Check completion status
-    const { completed, passed } = this.checkCompletionStatus(
-      session,
-      storyId
-    );
+    const { completed, passed } = this.checkCompletionStatus(session, storyId);
 
     // Generate recommendations
     const recommendations = this.generateRecommendations(
@@ -223,7 +220,9 @@ export class SessionDiagnosis {
     if (diagnosis.gateFailures.length > 0) {
       lines.push('⚠️  GATE FAILURES:');
       for (const failure of diagnosis.gateFailures) {
-        lines.push(`  ${failure.gate}: ${String(failure.attemptCount)} attempts`);
+        lines.push(
+          `  ${failure.gate}: ${String(failure.attemptCount)} attempts`
+        );
         lines.push(`    Failed lines: ${String(failure.failedLines.length)}`);
         if (failure.errorMessages.length > 0) {
           lines.push(
@@ -295,7 +294,7 @@ export class SessionDiagnosis {
    * Counts iterations for a story
    */
   private countIterations(events: MeterEvent[]): number {
-    return events.filter(e => e.eventType === 'iteration_start').length;
+    return events.filter((e) => e.eventType === 'iteration_start').length;
   }
 
   /**
@@ -318,12 +317,8 @@ export class SessionDiagnosis {
    * Calculates time spent on a story
    */
   private calculateTimeSpent(events: MeterEvent[]): number | undefined {
-    const starts = events.filter(
-      e => e.eventType === 'iteration_start'
-    );
-    const ends = events.filter(
-      e => e.eventType === 'iteration_end'
-    );
+    const starts = events.filter((e) => e.eventType === 'iteration_start');
+    const ends = events.filter((e) => e.eventType === 'iteration_end');
 
     if (starts.length === 0 || ends.length === 0) {
       return undefined;
@@ -354,11 +349,11 @@ export class SessionDiagnosis {
 
     // Analyze G1 (compilation) failures
     const compilationEvents = events.filter(
-      e => e.eventType === 'compilation_result'
+      (e) => e.eventType === 'compilation_result'
     );
 
     const compilationFailures = compilationEvents.filter(
-      e => !e.payload.success
+      (e) => !e.payload.success
     );
 
     if (compilationFailures.length > 0) {
@@ -383,11 +378,9 @@ export class SessionDiagnosis {
     }
 
     // Analyze G2 (test) failures
-    const testEvents = events.filter(
-      e => e.eventType === 'test_result'
-    );
+    const testEvents = events.filter((e) => e.eventType === 'test_result');
 
-    const testFailures = testEvents.filter(e => !e.payload.success);
+    const testFailures = testEvents.filter((e) => !e.payload.success);
 
     if (testFailures.length > 0) {
       const errorMessages: string[] = [];
@@ -410,13 +403,13 @@ export class SessionDiagnosis {
     const gateResults = this.gateTracker.getResults(sessionId);
     if (gateResults.ok) {
       const g3Results = gateResults.value.filter(
-        r => r.gate === 'G3_REACHABLE'
+        (r) => r.gate === 'G3_REACHABLE'
       );
 
       if (g3Results.length > 0) {
         // Count failed lines from line results
         const failedLines: { file: string; line: number }[] = [];
-        
+
         for (const result of g3Results) {
           for (const lr of result.lineResults) {
             if (!lr.passed) {
@@ -427,12 +420,14 @@ export class SessionDiagnosis {
             }
           }
         }
-        
+
         if (failedLines.length > 0) {
           failures.push({
             gate: 'G3_REACHABLE',
             failedLines,
-            errorMessages: [`${String(failedLines.length)} lines not reachable`],
+            errorMessages: [
+              `${String(failedLines.length)} lines not reachable`,
+            ],
             attemptCount: g3Results.length,
           });
         }
@@ -451,15 +446,14 @@ export class SessionDiagnosis {
   ): { completed: boolean; passed?: boolean } {
     // Look for story_complete event
     const storyCompleteEvent = session.events.find(
-      e =>
+      (e) =>
         e.eventType === 'story_complete' &&
         (e as { payload: { storyId: string } }).payload.storyId === storyId
     );
 
     if (storyCompleteEvent !== undefined) {
-      const passes = (
-        storyCompleteEvent as { payload: { passes: boolean } }
-      ).payload.passes;
+      const passes = (storyCompleteEvent as { payload: { passes: boolean } })
+        .payload.passes;
       return { completed: true, passed: passes };
     }
 
@@ -493,7 +487,10 @@ export class SessionDiagnosis {
           message: `Story stuck on ${failure.gate} - ${String(failure.attemptCount)} attempts`,
           details:
             failure.failedLines.length > 0
-              ? `Check errors in: ${failure.failedLines.slice(0, 3).map(l => `${l.file}:${String(l.line)}`).join(', ')}`
+              ? `Check errors in: ${failure.failedLines
+                  .slice(0, 3)
+                  .map((l) => `${l.file}:${String(l.line)}`)
+                  .join(', ')}`
               : 'Review error messages for details',
         });
       }
@@ -528,7 +525,7 @@ export class SessionDiagnosis {
         message: 'Story is still in progress',
         details:
           gateFailures.length > 0
-            ? `Currently blocked on: ${gateFailures.map(f => f.gate).join(', ')}`
+            ? `Currently blocked on: ${gateFailures.map((f) => f.gate).join(', ')}`
             : 'Continue working through iterations',
       });
     }
@@ -541,7 +538,7 @@ export class SessionDiagnosis {
         message: 'Story completed but did not pass all gates',
         details:
           gateFailures.length > 0
-            ? `Failed gates: ${gateFailures.map(f => f.gate).join(', ')}`
+            ? `Failed gates: ${gateFailures.map((f) => f.gate).join(', ')}`
             : 'Review gate thresholds and requirements',
       });
     }

@@ -142,10 +142,10 @@ describe('SessionReplayGenerator', () => {
           expect(iter.summary.compilationAttempts).toBe(2);
           expect(iter.summary.compilationSuccesses).toBe(1);
           expect(
-            iter.summary.keyEvents.some(e => e.includes('Compilation failed'))
+            iter.summary.keyEvents.some((e) => e.includes('Compilation failed'))
           ).toBe(true);
           expect(
-            iter.summary.keyEvents.some(e => e.includes('Compilation passed'))
+            iter.summary.keyEvents.some((e) => e.includes('Compilation passed'))
           ).toBe(true);
         }
       }
@@ -190,10 +190,10 @@ describe('SessionReplayGenerator', () => {
           expect(iter.summary.testAttempts).toBe(2);
           expect(iter.summary.testSuccesses).toBe(1);
           expect(
-            iter.summary.keyEvents.some(e => e.includes('Tests failed'))
+            iter.summary.keyEvents.some((e) => e.includes('Tests failed'))
           ).toBe(true);
           expect(
-            iter.summary.keyEvents.some(e => e.includes('Tests passed'))
+            iter.summary.keyEvents.some((e) => e.includes('Tests passed'))
           ).toBe(true);
         }
       }
@@ -333,7 +333,7 @@ describe('SessionReplayGenerator', () => {
         expect(iter).toBeDefined();
         if (iter !== undefined) {
           expect(
-            iter.summary.keyEvents.some(e => e.includes('Story passed'))
+            iter.summary.keyEvents.some((e) => e.includes('Story passed'))
           ).toBe(true);
         }
       }

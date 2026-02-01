@@ -128,10 +128,7 @@ export class SessionTimelineGenerator {
     const session = sessionResult.value;
 
     // Build iteration timeline
-    const iterations = this.buildIterationTimeline(
-      session,
-      synthTrend ?? []
-    );
+    const iterations = this.buildIterationTimeline(session, synthTrend ?? []);
 
     if (iterations.length === 0) {
       return err({
@@ -170,8 +167,12 @@ export class SessionTimelineGenerator {
 
     // Summary
     lines.push('SUMMARY:');
-    lines.push(`  Total Iterations: ${String(timeline.summary.totalIterations)}`);
-    lines.push(`  Total Tokens: ${timeline.summary.totalTokens.toLocaleString()}`);
+    lines.push(
+      `  Total Iterations: ${String(timeline.summary.totalIterations)}`
+    );
+    lines.push(
+      `  Total Tokens: ${timeline.summary.totalTokens.toLocaleString()}`
+    );
     if (timeline.summary.finalLOC !== undefined) {
       lines.push(`  Final LOC: ${String(timeline.summary.finalLOC)}`);
     }
@@ -179,10 +180,14 @@ export class SessionTimelineGenerator {
       lines.push(`  Final Ralph: ${timeline.summary.finalRalph.toFixed(2)}`);
     }
     if (timeline.summary.averageRalph !== undefined) {
-      lines.push(`  Average Ralph: ${timeline.summary.averageRalph.toFixed(2)}`);
+      lines.push(
+        `  Average Ralph: ${timeline.summary.averageRalph.toFixed(2)}`
+      );
     }
     if (timeline.summary.maxRalphSpike !== undefined) {
-      lines.push(`  Max Ralph Spike: ${timeline.summary.maxRalphSpike.toFixed(2)}`);
+      lines.push(
+        `  Max Ralph Spike: ${timeline.summary.maxRalphSpike.toFixed(2)}`
+      );
     }
     lines.push('');
 
@@ -201,16 +206,18 @@ export class SessionTimelineGenerator {
     lines.push('ITERATIONS:');
     lines.push('─'.repeat(80));
     for (const iter of timeline.iterations) {
-      const status = iter.success === true ? '✓' : iter.success === false ? '✗' : '⋯';
-      const duration = iter.durationSeconds !== undefined
-        ? `${String(iter.durationSeconds)}s`
-        : 'ongoing';
-      const ralphStr = iter.Ralph !== undefined
-        ? `Ralph: ${iter.Ralph.toFixed(2)}`
-        : '';
-      const deltaStr = iter.ralphDelta !== undefined
-        ? ` (Δ${iter.ralphDelta >= 0 ? '+' : ''}${iter.ralphDelta.toFixed(2)})`
-        : '';
+      const status =
+        iter.success === true ? '✓' : iter.success === false ? '✗' : '⋯';
+      const duration =
+        iter.durationSeconds !== undefined
+          ? `${String(iter.durationSeconds)}s`
+          : 'ongoing';
+      const ralphStr =
+        iter.Ralph !== undefined ? `Ralph: ${iter.Ralph.toFixed(2)}` : '';
+      const deltaStr =
+        iter.ralphDelta !== undefined
+          ? ` (Δ${iter.ralphDelta >= 0 ? '+' : ''}${iter.ralphDelta.toFixed(2)})`
+          : '';
 
       lines.push(
         `${status} #${String(iter.iterationNumber)} ${iter.storyId} | ${duration} | ${String(iter.tokensUsed)} tokens | ${ralphStr}${deltaStr}`
@@ -275,7 +282,7 @@ export class SessionTimelineGenerator {
           // Find the active iteration (most recent without endTime)
           const activeIter = Array.from(iterations.values())
             .reverse()
-            .find(i => i.endTime === undefined);
+            .find((i) => i.endTime === undefined);
 
           if (activeIter !== undefined) {
             activeIter.tokensUsed += count;
@@ -294,10 +301,10 @@ export class SessionTimelineGenerator {
     for (let i = 0; i < iterArray.length; i++) {
       const iter = iterArray[i];
       // Array iteration guarantees iter is defined
-      // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+       
       if (iter === undefined) continue;
-      
-      const trend = synthTrend.find(t => t.storyId === iter.storyId);
+
+      const trend = synthTrend.find((t) => t.storyId === iter.storyId);
 
       if (trend !== undefined) {
         iter.loc = trend.loc;
@@ -318,9 +325,7 @@ export class SessionTimelineGenerator {
    *
    * A spike is defined as a Ralph increase > 20% from previous iteration
    */
-  private identifySpikes(
-    iterations: IterationTimelineEntry[]
-  ): SpikePoint[] {
+  private identifySpikes(iterations: IterationTimelineEntry[]): SpikePoint[] {
     const spikes: SpikePoint[] = [];
 
     for (const iter of iterations) {
@@ -368,7 +373,7 @@ export class SessionTimelineGenerator {
 
     // Calculate average Ralph (from iterations with Ralph data)
     const ralphValues = iterations
-      .map(i => i.Ralph)
+      .map((i) => i.Ralph)
       .filter((r): r is number => r !== undefined);
 
     const averageRalph =
@@ -378,7 +383,7 @@ export class SessionTimelineGenerator {
 
     // Find max spike
     const ralphDeltas = iterations
-      .map(i => i.ralphDelta)
+      .map((i) => i.ralphDelta)
       .filter((d): d is number => d !== undefined);
 
     const maxRalphSpike =
