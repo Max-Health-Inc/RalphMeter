@@ -345,7 +345,7 @@
         "Tests pass in src/core/gate-plugin.test.ts"
       ],
       "priority": 18,
-      "passes": false,
+      "passes": true,
       "notes": "Quality gates are optional but enable stricter verification. vLOC meaning depends on which gates you require."
     },
     {
