@@ -307,7 +307,7 @@
         "Typecheck passes"
       ],
       "priority": 16,
-      "passes": false,
+      "passes": true,
       "notes": "The honest G3 report - not just pass/fail, but WHY."
     },
     {
