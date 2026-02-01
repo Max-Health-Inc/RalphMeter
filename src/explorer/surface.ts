@@ -17,7 +17,11 @@ import { type Result, ok, err } from '../shared/result.js';
 /**
  * Exploration mode determines authentication level
  */
-export type ExplorationMode = 'anonymous' | 'authenticated' | 'privileged' | 'full';
+export type ExplorationMode =
+  | 'anonymous'
+  | 'authenticated'
+  | 'privileged'
+  | 'full';
 
 /**
  * Credentials for exploration modes
@@ -244,7 +248,11 @@ export class SurfaceExplorer {
     options: ExploreOptions = {}
   ): Promise<Result<MergedExplorationLog, string>> {
     const startTime = Date.now();
-    const modes: ExplorationMode[] = ['anonymous', 'authenticated', 'privileged'];
+    const modes: ExplorationMode[] = [
+      'anonymous',
+      'authenticated',
+      'privileged',
+    ];
     const modeLogs: Record<ExplorationMode, ExplorationLog | null> = {
       anonymous: null,
       authenticated: null,
@@ -421,7 +429,9 @@ export class SurfaceExplorer {
       const usernameField = this.page.locator(usernameSelector).first();
 
       if ((await usernameField.count()) === 0) {
-        return err(`Username field not found with selector: ${usernameSelector}`);
+        return err(
+          `Username field not found with selector: ${usernameSelector}`
+        );
       }
 
       await usernameField.fill(username);
@@ -440,7 +450,9 @@ export class SurfaceExplorer {
       const passwordField = this.page.locator(passwordSelector).first();
 
       if ((await passwordField.count()) === 0) {
-        return err(`Password field not found with selector: ${passwordSelector}`);
+        return err(
+          `Password field not found with selector: ${passwordSelector}`
+        );
       }
 
       await passwordField.fill(password);

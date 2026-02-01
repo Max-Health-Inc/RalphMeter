@@ -266,8 +266,9 @@ describe('BarrierTracker', () => {
       });
 
       expect(blocked.authGated.length).toBeGreaterThan(0);
-      expect(blocked.authGated.some((line) => line.filePath.includes('users')))
-        .toBe(true);
+      expect(
+        blocked.authGated.some((line) => line.filePath.includes('users'))
+      ).toBe(true);
     });
 
     it('should infer paths for permission-gated URLs', () => {
@@ -563,8 +564,9 @@ describe('BarrierTracker', () => {
       });
 
       expect(blocked.authGated.length).toBeGreaterThan(0);
-      expect(blocked.authGated.some((line) => line.filePath.includes('users')))
-        .toBe(true);
+      expect(
+        blocked.authGated.some((line) => line.filePath.includes('users'))
+      ).toBe(true);
     });
 
     it('should handle URLs with fragments', () => {

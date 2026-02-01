@@ -293,7 +293,8 @@ describe('SurfaceExplorer', () => {
         // Should have login actions
         const loginActions = log.actions.filter(
           (a) =>
-            a.description.includes('login') || a.description.includes('authenticated')
+            a.description.includes('login') ||
+            a.description.includes('authenticated')
         );
         expect(loginActions.length).toBeGreaterThan(0);
       }
@@ -322,7 +323,8 @@ describe('SurfaceExplorer', () => {
         // Should have login actions
         const loginActions = log.actions.filter(
           (a) =>
-            a.description.includes('login') || a.description.includes('privileged')
+            a.description.includes('login') ||
+            a.description.includes('privileged')
         );
         expect(loginActions.length).toBeGreaterThan(0);
       }
