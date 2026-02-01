@@ -825,11 +825,11 @@ describe('RalphMeterServer', () => {
       expect(response.status).toBe(200);
       expect(response.body.recommendations).toBeTruthy();
       // Should have a recommendation about providing authentication
-      const authRec = response.body.recommendations.find((r: { message: string }) =>
-        r.message.includes('authentication')
-      );
+      const authRec = (
+        response.body.recommendations as { message: string; type: string }[]
+      ).find((r) => r.message.includes('authentication'));
       expect(authRec).toBeTruthy();
-      expect(authRec.type).toBe('action');
+      expect(authRec?.type).toBe('action');
     });
   });
 });

@@ -150,13 +150,15 @@ export class ReachabilityReport {
 
     // Create a set of file:line keys for barrier lookups
     const authGatedKeys = new Set(
-      barriers.authGated.map((l) => `${l.filePath}:${l.lineNumber}`)
+      barriers.authGated.map((l) => `${l.filePath}:${String(l.lineNumber)}`)
     );
     const permissionGatedKeys = new Set(
-      barriers.permissionGated.map((l) => `${l.filePath}:${l.lineNumber}`)
+      barriers.permissionGated.map(
+        (l) => `${l.filePath}:${String(l.lineNumber)}`
+      )
     );
     const paywallGatedKeys = new Set(
-      barriers.paywallGated.map((l) => `${l.filePath}:${l.lineNumber}`)
+      barriers.paywallGated.map((l) => `${l.filePath}:${String(l.lineNumber)}`)
     );
 
     // Lines that were not executed need further categorization
@@ -166,7 +168,7 @@ export class ReachabilityReport {
     const unreached: Line[] = [];
 
     for (const line of coverage.notExecuted) {
-      const key = `${line.filePath}:${line.lineNumber}`;
+      const key = `${line.filePath}:${String(line.lineNumber)}`;
 
       if (authGatedKeys.has(key)) {
         authGated.push(line);
@@ -231,7 +233,7 @@ export class ReachabilityReport {
    */
   private generateRecommendations(
     stats: ReachabilityStats,
-    categories: CategorizedLines
+    _categories: CategorizedLines
   ): ReachabilityRecommendation[] {
     const recommendations: ReachabilityRecommendation[] = [];
 
@@ -257,7 +259,7 @@ export class ReachabilityReport {
     if (stats.authGatedCount > 0) {
       recommendations.push({
         type: 'action',
-        message: `Provide authentication credentials to verify ${stats.authGatedCount} additional lines (${stats.authGatedPercent.toFixed(1)}%).`,
+        message: `Provide authentication credentials to verify ${String(stats.authGatedCount)} additional lines (${stats.authGatedPercent.toFixed(1)}%).`,
         details: `Use authenticated exploration mode to reach code behind 401 barriers.`,
       });
     }
@@ -266,7 +268,7 @@ export class ReachabilityReport {
     if (stats.permissionGatedCount > 0) {
       recommendations.push({
         type: 'action',
-        message: `Provide privileged credentials to verify ${stats.permissionGatedCount} additional lines (${stats.permissionGatedPercent.toFixed(1)}%).`,
+        message: `Provide privileged credentials to verify ${String(stats.permissionGatedCount)} additional lines (${stats.permissionGatedPercent.toFixed(1)}%).`,
         details: `Use privileged exploration mode to reach code behind 403 barriers.`,
       });
     }
@@ -275,7 +277,7 @@ export class ReachabilityReport {
     if (stats.paywallGatedCount > 0) {
       recommendations.push({
         type: 'info',
-        message: `${stats.paywallGatedCount} lines (${stats.paywallGatedPercent.toFixed(1)}%) are behind payment barriers.`,
+        message: `${String(stats.paywallGatedCount)} lines (${stats.paywallGatedPercent.toFixed(1)}%) are behind payment barriers.`,
         details: `Code behind 402 barriers requires payment or subscription to verify.`,
       });
     }
@@ -286,13 +288,13 @@ export class ReachabilityReport {
       if (unreachedPercent >= 20) {
         recommendations.push({
           type: 'warning',
-          message: `${stats.unreachedCount} lines (${unreachedPercent.toFixed(1)}%) are unreachable - potential dead code.`,
+          message: `${String(stats.unreachedCount)} lines (${unreachedPercent.toFixed(1)}%) are unreachable - potential dead code.`,
           details: `Review these lines: they may be dead code, untested edge cases, or require specific inputs to reach.`,
         });
       } else if (unreachedPercent >= 10) {
         recommendations.push({
           type: 'info',
-          message: `${stats.unreachedCount} lines (${unreachedPercent.toFixed(1)}%) were not reached during exploration.`,
+          message: `${String(stats.unreachedCount)} lines (${unreachedPercent.toFixed(1)}%) were not reached during exploration.`,
           details: `Consider adding test cases or exploration scenarios to verify these code paths.`,
         });
       }
@@ -326,7 +328,7 @@ export class ReachabilityReport {
     // Summary
     lines.push('SUMMARY');
     lines.push('-------');
-    lines.push(`Total Lines Analyzed: ${report.stats.total}`);
+    lines.push(`Total Lines Analyzed: ${String(report.stats.total)}`);
     lines.push('');
 
     // Categories

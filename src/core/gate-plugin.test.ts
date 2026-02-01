@@ -9,7 +9,7 @@ import {
   type GateArtifact,
   type GateResult,
 } from './gate-plugin.js';
-import { ok } from '../shared/result.js';
+import { ok, type Result } from '../shared/result.js';
 
 // Mock gate for testing
 class MockGate implements Gate {
@@ -22,10 +22,11 @@ class MockGate implements Gate {
     return projectMeta.languages.includes('typescript');
   }
 
+  // eslint-disable-next-line @typescript-eslint/require-await
   async check(
     artifact: GateArtifact,
     _config?: Record<string, unknown>
-  ): Promise<import('../shared/result.js').Result<GateResult, Error>> {
+  ): Promise<Result<GateResult>> {
     return ok({
       pass: artifact.type === 'file',
       score: 100,

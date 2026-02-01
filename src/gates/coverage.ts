@@ -42,6 +42,7 @@ export class CoverageGate implements Gate {
   /**
    * Checks coverage against minimum threshold
    */
+  // eslint-disable-next-line @typescript-eslint/require-await
   async check(
     artifact: GateArtifact,
     config?: Record<string, unknown>
