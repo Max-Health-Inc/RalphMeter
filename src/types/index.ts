@@ -44,3 +44,10 @@ export type {
   CapturedResponse,
   ExplorationLog,
 } from '../explorer/surface.js';
+
+export type {
+  BarrierType,
+  BarrierInfo,
+  BarrierAnalysis,
+  PathInferenceOptions,
+} from '../explorer/barriers.js';
