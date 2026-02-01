@@ -666,4 +666,170 @@ describe('RalphMeterServer', () => {
       expect(response.body.gateHistory.perGate.G1_COMPILE).toBeTruthy();
     });
   });
+
+  // ============================================================================
+  // POST /api/sessions/:id/reachability
+  // ============================================================================
+
+  describe('POST /api/sessions/:id/reachability', () => {
+    it('should generate reachability report from coverage and barrier data', async () => {
+      // 1. Create a session
+      const createResponse = await request.post('/api/sessions').send({});
+      const sessionId = createResponse.body.sessionId as string;
+
+      // 2. Send reachability request
+      const response = await request
+        .post(`/api/sessions/${sessionId}/reachability`)
+        .send({
+          coverage: {
+            executed: [
+              { filePath: '/src/app.ts', lineNumber: 1 },
+              { filePath: '/src/app.ts', lineNumber: 2 },
+            ],
+            notExecuted: [
+              { filePath: '/src/auth.ts', lineNumber: 10 },
+              { filePath: '/src/dead.ts', lineNumber: 40 },
+            ],
+          },
+          barriers: {
+            authGated: [{ filePath: '/src/auth.ts', lineNumber: 10 }],
+            permissionGated: [],
+            paywallGated: [],
+            barriers: [],
+          },
+        });
+
+      expect(response.status).toBe(200);
+      expect(response.body).toMatchObject({
+        categories: {
+          exercised: [
+            { filePath: '/src/app.ts', lineNumber: 1 },
+            { filePath: '/src/app.ts', lineNumber: 2 },
+          ],
+          authGated: [{ filePath: '/src/auth.ts', lineNumber: 10 }],
+          unreached: [{ filePath: '/src/dead.ts', lineNumber: 40 }],
+        },
+        stats: {
+          total: 4,
+          exercisedCount: 2,
+          authGatedCount: 1,
+          unreachedCount: 1,
+        },
+      });
+      expect(response.body.recommendations).toBeTruthy();
+      expect(Array.isArray(response.body.recommendations)).toBe(true);
+      expect(response.body.generatedAt).toBeTruthy();
+    });
+
+    it('should return 404 for non-existent session', async () => {
+      const response = await request
+        .post('/api/sessions/00000000-0000-0000-0000-000000000000/reachability')
+        .send({
+          coverage: {
+            executed: [],
+            notExecuted: [],
+          },
+          barriers: {
+            authGated: [],
+            permissionGated: [],
+            paywallGated: [],
+            barriers: [],
+          },
+        });
+
+      expect(response.status).toBe(404);
+      expect(response.body.code).toBe('SESSION_NOT_FOUND');
+    });
+
+    it('should return 400 for invalid coverage data', async () => {
+      // 1. Create a session
+      const createResponse = await request.post('/api/sessions').send({});
+      const sessionId = createResponse.body.sessionId as string;
+
+      // 2. Send invalid data
+      const response = await request
+        .post(`/api/sessions/${sessionId}/reachability`)
+        .send({
+          coverage: {
+            // Missing required fields
+          },
+          barriers: {
+            authGated: [],
+            permissionGated: [],
+            paywallGated: [],
+            barriers: [],
+          },
+        });
+
+      expect(response.status).toBe(400);
+      expect(response.body.code).toBe('VALIDATION_ERROR');
+    });
+
+    it('should handle all barrier types', async () => {
+      // 1. Create a session
+      const createResponse = await request.post('/api/sessions').send({});
+      const sessionId = createResponse.body.sessionId as string;
+
+      // 2. Send reachability request with all barrier types
+      const response = await request
+        .post(`/api/sessions/${sessionId}/reachability`)
+        .send({
+          coverage: {
+            executed: [{ filePath: '/src/app.ts', lineNumber: 1 }],
+            notExecuted: [
+              { filePath: '/src/auth.ts', lineNumber: 10 },
+              { filePath: '/src/admin.ts', lineNumber: 20 },
+              { filePath: '/src/premium.ts', lineNumber: 30 },
+            ],
+          },
+          barriers: {
+            authGated: [{ filePath: '/src/auth.ts', lineNumber: 10 }],
+            permissionGated: [{ filePath: '/src/admin.ts', lineNumber: 20 }],
+            paywallGated: [{ filePath: '/src/premium.ts', lineNumber: 30 }],
+            barriers: [],
+          },
+        });
+
+      expect(response.status).toBe(200);
+      expect(response.body.categories).toMatchObject({
+        exercised: [{ filePath: '/src/app.ts', lineNumber: 1 }],
+        authGated: [{ filePath: '/src/auth.ts', lineNumber: 10 }],
+        permissionGated: [{ filePath: '/src/admin.ts', lineNumber: 20 }],
+        paywallGated: [{ filePath: '/src/premium.ts', lineNumber: 30 }],
+        unreached: [],
+      });
+      expect(response.body.stats.total).toBe(4);
+    });
+
+    it('should generate recommendations based on reachability', async () => {
+      // 1. Create a session
+      const createResponse = await request.post('/api/sessions').send({});
+      const sessionId = createResponse.body.sessionId as string;
+
+      // 2. Send reachability request with auth-gated code
+      const response = await request
+        .post(`/api/sessions/${sessionId}/reachability`)
+        .send({
+          coverage: {
+            executed: [{ filePath: '/src/app.ts', lineNumber: 1 }],
+            notExecuted: [{ filePath: '/src/auth.ts', lineNumber: 10 }],
+          },
+          barriers: {
+            authGated: [{ filePath: '/src/auth.ts', lineNumber: 10 }],
+            permissionGated: [],
+            paywallGated: [],
+            barriers: [],
+          },
+        });
+
+      expect(response.status).toBe(200);
+      expect(response.body.recommendations).toBeTruthy();
+      // Should have a recommendation about providing authentication
+      const authRec = response.body.recommendations.find((r: { message: string }) =>
+        r.message.includes('authentication')
+      );
+      expect(authRec).toBeTruthy();
+      expect(authRec.type).toBe('action');
+    });
+  });
 });

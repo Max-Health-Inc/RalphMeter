@@ -23,3 +23,13 @@ export type {
   PathInferenceOptions,
 } from './barriers.js';
 export { BarrierTracker } from './barriers.js';
+
+export type {
+  ReachabilityCategory,
+  CategorizedLines,
+  ReachabilityStats,
+  RecommendationType,
+  ReachabilityRecommendation,
+  ReachabilityReportData,
+} from './report.js';
+export { ReachabilityReport } from './report.js';
