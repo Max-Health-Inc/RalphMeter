@@ -215,7 +215,11 @@ describe('EventCollector', () => {
     });
 
     it('closes session on session_end event (success)', () => {
-      const event = createSessionEndEvent(sessionId, true, 'All stories complete');
+      const event = createSessionEndEvent(
+        sessionId,
+        true,
+        'All stories complete'
+      );
       const result = collector.emit(event);
 
       expect(isOk(result)).toBe(true);
@@ -282,7 +286,9 @@ describe('EventCollector', () => {
       expect(isOk(sessionResult)).toBe(true);
       if (isOk(sessionResult)) {
         expect(sessionResult.value.events).toHaveLength(2);
-        expect(sessionResult.value.events[1]?.eventType).toBe('iteration_start');
+        expect(sessionResult.value.events[1]?.eventType).toBe(
+          'iteration_start'
+        );
       }
     });
 
@@ -295,7 +301,11 @@ describe('EventCollector', () => {
     });
 
     it('appends tokens_in event to session', () => {
-      const event = createTokensInEvent(sessionId, 1000, 'claude-opus-4-5-20251101');
+      const event = createTokensInEvent(
+        sessionId,
+        1000,
+        'claude-opus-4-5-20251101'
+      );
       const result = collector.emit(event);
 
       expect(isOk(result)).toBe(true);

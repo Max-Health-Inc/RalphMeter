@@ -154,7 +154,9 @@ describe('detectLanguage', () => {
   });
 
   it('handles full paths', () => {
-    expect(detectLanguage('/home/user/project/src/index.ts')).toBe('typescript');
+    expect(detectLanguage('/home/user/project/src/index.ts')).toBe(
+      'typescript'
+    );
     expect(detectLanguage('C:\\Users\\dev\\project\\main.py')).toBe('python');
   });
 
@@ -542,7 +544,10 @@ describe('snapshotCodebase', () => {
   });
 
   it('calculates correct totals', () => {
-    fs.writeFileSync(path.join(tempDir, 'file1.ts'), 'const a = 1;\n\n// comment');
+    fs.writeFileSync(
+      path.join(tempDir, 'file1.ts'),
+      'const a = 1;\n\n// comment'
+    );
     fs.writeFileSync(path.join(tempDir, 'file2.ts'), 'const b = 2;');
 
     const result = snapshotCodebase(tempDir);

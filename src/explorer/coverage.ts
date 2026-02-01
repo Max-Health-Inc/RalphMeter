@@ -69,26 +69,24 @@ export interface InstrumentedOptions {
   exclude?: string[];
 }
 
-/**
- * V8 Coverage format interfaces (from c8/v8)
- */
-interface V8Range {
-  startOffset: number;
-  endOffset: number;
-  count: number;
-}
-
-interface V8FunctionCoverage {
-  functionName: string;
-  ranges: V8Range[];
-  isBlockCoverage: boolean;
-}
-
-interface V8ScriptCoverage {
-  scriptId: string;
-  url: string;
-  functions: V8FunctionCoverage[];
-}
+// V8 Coverage format interfaces (from c8/v8) reserved for future use
+// interface V8Range {
+//   startOffset: number;
+//   endOffset: number;
+//   count: number;
+// }
+//
+// interface V8FunctionCoverage {
+//   functionName: string;
+//   ranges: V8Range[];
+//   isBlockCoverage: boolean;
+// }
+//
+// interface V8ScriptCoverage {
+//   scriptId: string;
+//   url: string;
+//   functions: V8FunctionCoverage[];
+// }
 
 // ============================================================================
 // CoverageCollector
@@ -202,8 +200,7 @@ export class CoverageCollector {
 
       return ok({ pid, coverageDir: this.coverageDir });
     } catch (error) {
-      const message =
-        error instanceof Error ? error.message : String(error);
+      const message = error instanceof Error ? error.message : String(error);
       return err(`Failed to start instrumented process: ${message}`);
     }
   }
@@ -222,7 +219,7 @@ export class CoverageCollector {
     if (this.process.exitCode !== null) {
       // Process already exited, wait for c8 to finish writing
       await new Promise((r) => setTimeout(r, COVERAGE_WRITE_DELAY_MS));
-      const result = await this.parseCoverageData();
+      const result = this.parseCoverageData();
       this.process = null;
       return result;
     }
@@ -249,7 +246,7 @@ export class CoverageCollector {
           await new Promise((r) => setTimeout(r, COVERAGE_WRITE_DELAY_MS));
 
           // Parse coverage data
-          const coverageResult = await this.parseCoverageData();
+          const coverageResult = this.parseCoverageData();
           this.process = null;
 
           resolve(coverageResult);
@@ -266,7 +263,7 @@ export class CoverageCollector {
   /**
    * Parse coverage data from c8 JSON reports
    */
-  private async parseCoverageData(): Promise<Result<CoverageData, string>> {
+  private parseCoverageData(): Result<CoverageData, string> {
     const coverageFile = path.join(this.coverageDir, 'coverage-final.json');
 
     if (!fs.existsSync(coverageFile)) {
@@ -277,44 +274,43 @@ export class CoverageCollector {
 
     try {
       const coverageJson = fs.readFileSync(coverageFile, 'utf-8');
-      const coverage: Record<string, any> = JSON.parse(coverageJson);
+      const coverage = JSON.parse(coverageJson) as Record<string, unknown>;
 
       const executed: Line[] = [];
       const notExecuted: Line[] = [];
 
+      // Istanbul/NYC coverage format interfaces
+      interface StatementLocation {
+        start: { line: number; column: number };
+        end: { line: number; column: number };
+      }
+      interface FileCoverage {
+        statementMap?: Record<string, StatementLocation>;
+        s?: Record<string, number>;
+      }
+
       // Parse V8 coverage format
-      for (const [filePath, fileCoverage] of Object.entries(coverage)) {
-        if (typeof fileCoverage !== 'object' || fileCoverage === null) {
+      for (const [filePath, rawFileCoverage] of Object.entries(coverage)) {
+        if (typeof rawFileCoverage !== 'object' || rawFileCoverage === null) {
           continue;
         }
 
+        const fileCoverage = rawFileCoverage as FileCoverage;
+
         // Get line coverage information
-        const statementMap =
-          (fileCoverage).statementMap ?? ({} as Record<string, any>);
-        const statements =
-          (fileCoverage).s ?? ({} as Record<string, number>);
+        const statementMap = fileCoverage.statementMap ?? {};
+        const statements = fileCoverage.s ?? {};
 
         // Build a map of line numbers to execution counts
         const lineExecutionCounts = new Map<number, number>();
 
         for (const [key, location] of Object.entries(statementMap)) {
-          if (
-            typeof location !== 'object' ||
-            location === null ||
-            typeof (location as any).start !== 'object'
-          ) {
-            continue;
-          }
-
-          const lineNumber = (location as any).start.line as number;
+          const lineNumber = location.start.line;
           const executionCount = statements[key] ?? 0;
 
           // Accumulate execution counts per line
           const currentCount = lineExecutionCounts.get(lineNumber) ?? 0;
-          lineExecutionCounts.set(
-            lineNumber,
-            currentCount + executionCount
-          );
+          lineExecutionCounts.set(lineNumber, currentCount + executionCount);
         }
 
         // Convert to Line objects
@@ -334,8 +330,7 @@ export class CoverageCollector {
 
       return ok({ executed, notExecuted });
     } catch (error) {
-      const message =
-        error instanceof Error ? error.message : String(error);
+      const message = error instanceof Error ? error.message : String(error);
       return err(`Failed to parse coverage data: ${message}`);
     }
   }

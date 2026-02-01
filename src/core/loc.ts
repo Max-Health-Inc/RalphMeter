@@ -133,13 +133,17 @@ export function countLines(content: string, language: Language): LOCResult {
       if (!inBlockComment && trimmed.includes(style.blockStart)) {
         // Check if block comment ends on same line
         const startIdx = trimmed.indexOf(style.blockStart);
-        const afterStart = trimmed.substring(startIdx + style.blockStart.length);
+        const afterStart = trimmed.substring(
+          startIdx + style.blockStart.length
+        );
 
         if (afterStart.includes(style.blockEnd)) {
           // Single-line block comment - check if there's code before or after
           const beforeComment = trimmed.substring(0, startIdx).trim();
           const endIdx = afterStart.indexOf(style.blockEnd);
-          const afterComment = afterStart.substring(endIdx + style.blockEnd.length).trim();
+          const afterComment = afterStart
+            .substring(endIdx + style.blockEnd.length)
+            .trim();
 
           if (beforeComment !== '' || afterComment !== '') {
             // Has code on same line
@@ -167,8 +171,13 @@ export function countLines(content: string, language: Language): LOCResult {
         if (trimmed.includes(style.blockEnd)) {
           // Check if there's code after the block end
           const endIdx = trimmed.indexOf(style.blockEnd);
-          const afterEnd = trimmed.substring(endIdx + style.blockEnd.length).trim();
-          if (afterEnd !== '' && !afterEnd.startsWith(style.lineComment ?? '')) {
+          const afterEnd = trimmed
+            .substring(endIdx + style.blockEnd.length)
+            .trim();
+          if (
+            afterEnd !== '' &&
+            !afterEnd.startsWith(style.lineComment ?? '')
+          ) {
             code++;
           } else {
             comments++;

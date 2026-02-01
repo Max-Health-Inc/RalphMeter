@@ -23,7 +23,7 @@ function createTestSession(
   tokensOut: number
 ): string {
   const sessionId = createSessionId();
-  
+
   // Start session
   collector.emit({
     eventType: 'session_start',
@@ -75,7 +75,7 @@ function createTestSession(
       },
     });
   }
-  
+
   return sessionId;
 }
 

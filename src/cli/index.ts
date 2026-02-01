@@ -8,10 +8,6 @@
 
 import { Command } from 'commander';
 import { createServer } from '../api/server.js';
-import { EventCollector } from '../core/collector.js';
-import { GateTracker } from '../core/gates.js';
-import { LOCCounter } from '../core/loc.js';
-import { MetricsCalculator } from '../core/metrics.js';
 
 // ============================================================================
 // CLI Commands
@@ -20,7 +16,7 @@ import { MetricsCalculator } from '../core/metrics.js';
 /**
  * Start command - launches the API server
  */
-async function startCommand(options: { port?: string }): Promise<void> {
+function startCommand(options: { port?: string }): void {
   const port = options.port !== undefined ? parseInt(options.port, 10) : 3333;
 
   if (isNaN(port) || port < 1 || port > 65535) {
@@ -45,7 +41,9 @@ async function statusCommand(options: { url?: string }): Promise<void> {
     });
 
     if (!response.ok) {
-      console.error(`Error: Failed to fetch sessions (HTTP ${String(response.status)})`);
+      console.error(
+        `Error: Failed to fetch sessions (HTTP ${String(response.status)})`
+      );
       process.exit(1);
     }
 
@@ -78,9 +76,12 @@ async function statusCommand(options: { url?: string }): Promise<void> {
     if (active.length > 0) {
       console.log(`🟢 Active Sessions (${String(active.length)}):`);
       for (const session of active) {
-        const tags = session.tags !== undefined
-          ? ` [${Object.entries(session.tags).map(([k, v]) => `${k}=${v}`).join(', ')}]`
-          : '';
+        const tags =
+          session.tags !== undefined
+            ? ` [${Object.entries(session.tags)
+                .map(([k, v]) => `${k}=${v}`)
+                .join(', ')}]`
+            : '';
         console.log(`  • ${session.sessionId}${tags}`);
         console.log(`    Started: ${session.startedAt}`);
         console.log(`    Events: ${String(session.eventCount)}`);
@@ -119,7 +120,9 @@ async function statusCommand(options: { url?: string }): Promise<void> {
       console.error(`Error: Cannot connect to RalphMeter server at ${baseUrl}`);
       console.error('Make sure the server is running with: ralphmeter start');
     } else {
-      console.error(`Error: ${error instanceof Error ? error.message : String(error)}`);
+      console.error(
+        `Error: ${error instanceof Error ? error.message : String(error)}`
+      );
     }
     process.exit(1);
   }
@@ -152,18 +155,24 @@ async function reportCommand(
       if (response.status === 404) {
         console.error(`Error: Session not found: ${sessionId}`);
       } else {
-        console.error(`Error: Failed to fetch metrics (HTTP ${String(response.status)})`);
+        console.error(
+          `Error: Failed to fetch metrics (HTTP ${String(response.status)})`
+        );
       }
       process.exit(1);
     }
 
-    const data = await response.json();
+    const data = (await response.json()) as Record<string, unknown>;
 
     // If we got basic metrics only
-    if ('basicMetrics' in data && typeof data === 'object' && data !== null) {
+    if (
+      'basicMetrics' in data &&
+      typeof data['basicMetrics'] === 'object' &&
+      data['basicMetrics'] !== null
+    ) {
       console.log(`\n📊 Session Report: ${sessionId}\n`);
       console.log('Basic Metrics:');
-      const basicMetrics = data.basicMetrics as {
+      const basicMetrics = data['basicMetrics'] as {
         totalIterations: number;
         totalTokensIn: number;
         totalTokensOut: number;
@@ -177,16 +186,26 @@ async function reportCommand(
       console.log(`  Iterations: ${String(basicMetrics.totalIterations)}`);
       console.log(`  Tokens In: ${String(basicMetrics.totalTokensIn)}`);
       console.log(`  Tokens Out: ${String(basicMetrics.totalTokensOut)}`);
-      console.log(`  Total Tokens: ${String(basicMetrics.totalTokensIn + basicMetrics.totalTokensOut)}`);
-      console.log(`  Compilations: ${String(basicMetrics.compilationSuccesses)}/${String(basicMetrics.compilationAttempts)}`);
-      console.log(`  Tests: ${String(basicMetrics.testSuccesses)}/${String(basicMetrics.testAttempts)}`);
-      console.log(`  Stories: ${String(basicMetrics.storiesPassed)}/${String(basicMetrics.storiesCompleted)}`);
-      console.log('\n💡 Tip: Use --root-path to get full metrics with LOC analysis\n');
+      console.log(
+        `  Total Tokens: ${String(basicMetrics.totalTokensIn + basicMetrics.totalTokensOut)}`
+      );
+      console.log(
+        `  Compilations: ${String(basicMetrics.compilationSuccesses)}/${String(basicMetrics.compilationAttempts)}`
+      );
+      console.log(
+        `  Tests: ${String(basicMetrics.testSuccesses)}/${String(basicMetrics.testAttempts)}`
+      );
+      console.log(
+        `  Stories: ${String(basicMetrics.storiesPassed)}/${String(basicMetrics.storiesCompleted)}`
+      );
+      console.log(
+        '\n💡 Tip: Use --root-path to get full metrics with LOC analysis\n'
+      );
       return;
     }
 
     // Full metrics report
-    if ('metrics' in data && typeof data === 'object' && data !== null) {
+    if ('metrics' in data) {
       const report = data as {
         metrics: {
           verifiedLOC: number;
@@ -215,7 +234,15 @@ async function reportCommand(
         } | null;
         gateStats: {
           overallPoE: number;
-          gates: Record<string, { linesChecked: number; linesPassed: number; passRate: number; poe: number }>;
+          gates: Record<
+            string,
+            {
+              linesChecked: number;
+              linesPassed: number;
+              passRate: number;
+              poe: number;
+            }
+          >;
         } | null;
       };
 
@@ -223,14 +250,20 @@ async function reportCommand(
 
       // Core metrics
       console.log('═══ Core Metrics ═══');
-      console.log(`  Ralph (tokens/LOC): ${report.metrics.tokensPerLOC.toFixed(2)}`);
-      console.log(`  Verified LOC: ${String(report.metrics.verifiedLOC)} / ${String(report.metrics.totalLOC)} (${(report.metrics.verificationRate * 100).toFixed(1)}%)`);
+      console.log(
+        `  Ralph (tokens/LOC): ${report.metrics.tokensPerLOC.toFixed(2)}`
+      );
+      console.log(
+        `  Verified LOC: ${String(report.metrics.verifiedLOC)} / ${String(report.metrics.totalLOC)} (${(report.metrics.verificationRate * 100).toFixed(1)}%)`
+      );
       console.log(`  PoE-LOC: ${(report.metrics.poeLOC * 100).toFixed(2)}%`);
       console.log();
 
       // Productivity
       console.log('═══ Productivity ═══');
-      console.log(`  Duration: ${report.metrics.totalMinutes.toFixed(1)} minutes`);
+      console.log(
+        `  Duration: ${report.metrics.totalMinutes.toFixed(1)} minutes`
+      );
       console.log(`  LOC/min: ${report.metrics.locPerMinute.toFixed(1)}`);
       console.log(`  vLOC/min: ${report.metrics.vlocPerMinute.toFixed(1)}`);
       console.log(`  Total Tokens: ${String(report.metrics.totalTokens)}`);
@@ -247,10 +280,14 @@ async function reportCommand(
       // Gate statistics
       if (report.gateStats !== null) {
         console.log('═══ Gate Statistics ═══');
-        console.log(`  Overall PoE: ${(report.gateStats.overallPoE * 100).toFixed(2)}%`);
+        console.log(
+          `  Overall PoE: ${(report.gateStats.overallPoE * 100).toFixed(2)}%`
+        );
         for (const [gate, stats] of Object.entries(report.gateStats.gates)) {
           console.log(`  ${gate}:`);
-          console.log(`    Lines: ${String(stats.linesPassed)} / ${String(stats.linesChecked)} (${(stats.passRate * 100).toFixed(1)}%)`);
+          console.log(
+            `    Lines: ${String(stats.linesPassed)} / ${String(stats.linesChecked)} (${(stats.passRate * 100).toFixed(1)}%)`
+          );
           console.log(`    PoE: ${(stats.poe * 100).toFixed(2)}%`);
         }
         console.log();
@@ -259,9 +296,15 @@ async function reportCommand(
       // Session metrics
       if (report.sessionMetrics !== null) {
         console.log('═══ Session Metrics ═══');
-        console.log(`  Iterations: ${String(report.sessionMetrics.totalIterations)}`);
-        console.log(`  Tokens In: ${String(report.sessionMetrics.totalTokensIn)}`);
-        console.log(`  Tokens Out: ${String(report.sessionMetrics.totalTokensOut)}`);
+        console.log(
+          `  Iterations: ${String(report.sessionMetrics.totalIterations)}`
+        );
+        console.log(
+          `  Tokens In: ${String(report.sessionMetrics.totalTokensIn)}`
+        );
+        console.log(
+          `  Tokens Out: ${String(report.sessionMetrics.totalTokensOut)}`
+        );
         console.log();
       }
     }
@@ -270,22 +313,12 @@ async function reportCommand(
       console.error(`Error: Cannot connect to RalphMeter server at ${baseUrl}`);
       console.error('Make sure the server is running with: ralphmeter start');
     } else {
-      console.error(`Error: ${error instanceof Error ? error.message : String(error)}`);
+      console.error(
+        `Error: ${error instanceof Error ? error.message : String(error)}`
+      );
     }
     process.exit(1);
   }
-}
-
-/**
- * Local report command - generates report without server
- */
-async function localReportCommand(
-  sessionId: string,
-  options: { rootPath?: string }
-): Promise<void> {
-  console.error('Error: Local report generation not yet implemented.');
-  console.error('Please use the API server: ralphmeter report <sessionId> --url http://localhost:3333');
-  process.exit(1);
 }
 
 // ============================================================================
@@ -296,7 +329,9 @@ const program = new Command();
 
 program
   .name('ralphmeter')
-  .description('RalphMeter - Metering and transparency layer for AI coding agents')
+  .description(
+    'RalphMeter - Metering and transparency layer for AI coding agents'
+  )
   .version('0.1.0');
 
 // Start command

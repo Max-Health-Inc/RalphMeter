@@ -5,10 +5,7 @@
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import { RalphMeterServer } from '../api/server.js';
 import type { Server as HttpServer } from 'node:http';
-import { spawn, type ChildProcess } from 'node:child_process';
-import { promisify } from 'node:util';
-
-const sleep = promisify(setTimeout);
+import { spawn } from 'node:child_process';
 
 /**
  * Helper to run CLI command and capture output
@@ -65,13 +62,11 @@ describe('CLI Commands', () => {
   });
 
   afterEach(async () => {
-    if (httpServer) {
-      await new Promise<void>((resolve) => {
-        httpServer.close(() => {
-          resolve();
-        });
+    await new Promise<void>((resolve) => {
+      httpServer.close(() => {
+        resolve();
       });
-    }
+    });
   });
 
   describe('--help', () => {
@@ -109,7 +104,11 @@ describe('CLI Commands', () => {
 
   describe('status command', () => {
     it('should show no sessions when server is empty', async () => {
-      const result = await runCLI(['status', '--url', `http://localhost:${String(testPort)}`]);
+      const result = await runCLI([
+        'status',
+        '--url',
+        `http://localhost:${String(testPort)}`,
+      ]);
       expect(result.exitCode).toBe(0);
       expect(result.stdout).toContain('Total sessions: 0');
       expect(result.stdout).toContain('No sessions found');
@@ -127,7 +126,11 @@ describe('CLI Commands', () => {
       };
       server.getCollector().emit(sessionEvent);
 
-      const result = await runCLI(['status', '--url', `http://localhost:${String(testPort)}`]);
+      const result = await runCLI([
+        'status',
+        '--url',
+        `http://localhost:${String(testPort)}`,
+      ]);
       expect(result.exitCode).toBe(0);
       expect(result.stdout).toContain('Total sessions: 1');
       expect(result.stdout).toContain('Active Sessions');
@@ -185,7 +188,12 @@ describe('CLI Commands', () => {
     });
 
     it('should handle unreachable server', async () => {
-      const result = await runCLI(['report', 'some-session', '--url', 'http://localhost:9999']);
+      const result = await runCLI([
+        'report',
+        'some-session',
+        '--url',
+        'http://localhost:9999',
+      ]);
       expect(result.exitCode).toBe(1);
       expect(result.stderr).toContain('Cannot connect to RalphMeter server');
     });

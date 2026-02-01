@@ -17,6 +17,7 @@
     "format": "prettier --write \"src/**/*.ts\"",
     "format:check": "prettier --check \"src/**/*.ts\"",
     "typecheck": "tsc --noEmit",
+    "check": "npm run lint && npm run typecheck && npm run format:check",
     "start": "node dist/index.js"
   },
   "keywords": [

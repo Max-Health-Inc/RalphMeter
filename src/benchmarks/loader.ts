@@ -52,9 +52,7 @@ function getReferencesDir(): string {
 /**
  * Load a benchmark PRD from a file
  */
-export function loadBenchmark(
-  filename: string
-): Result<BenchmarkPRD, string> {
+export function loadBenchmark(filename: string): Result<BenchmarkPRD, string> {
   try {
     const referencesDir = getReferencesDir();
     const filePath = join(referencesDir, filename);
@@ -63,15 +61,12 @@ export function loadBenchmark(
 
     const result = BenchmarkPRDSchema.safeParse(data);
     if (!result.success) {
-      return err(
-        `Validation failed for ${filename}: ${result.error.message}`
-      );
+      return err(`Validation failed for ${filename}: ${result.error.message}`);
     }
 
     return ok(result.data);
   } catch (error) {
-    const message =
-      error instanceof Error ? error.message : 'Unknown error';
+    const message = error instanceof Error ? error.message : 'Unknown error';
     return err(`Failed to load ${filename}: ${message}`);
   }
 }
@@ -79,15 +74,10 @@ export function loadBenchmark(
 /**
  * Load all benchmark PRDs from the references directory
  */
-export function loadAllBenchmarks(): Result<
-  Map<string, BenchmarkPRD>,
-  string
-> {
+export function loadAllBenchmarks(): Result<Map<string, BenchmarkPRD>, string> {
   try {
     const referencesDir = getReferencesDir();
-    const files = readdirSync(referencesDir).filter((f) =>
-      f.endsWith('.json')
-    );
+    const files = readdirSync(referencesDir).filter((f) => f.endsWith('.json'));
 
     const benchmarks = new Map<string, BenchmarkPRD>();
     const errors: string[] = [];
@@ -108,8 +98,7 @@ export function loadAllBenchmarks(): Result<
 
     return ok(benchmarks);
   } catch (error) {
-    const message =
-      error instanceof Error ? error.message : 'Unknown error';
+    const message = error instanceof Error ? error.message : 'Unknown error';
     return err(`Failed to load benchmarks: ${message}`);
   }
 }
@@ -126,8 +115,7 @@ export function listBenchmarks(): Result<string[], string> {
 
     return ok(files);
   } catch (error) {
-    const message =
-      error instanceof Error ? error.message : 'Unknown error';
+    const message = error instanceof Error ? error.message : 'Unknown error';
     return err(`Failed to list benchmarks: ${message}`);
   }
 }
@@ -135,9 +123,7 @@ export function listBenchmarks(): Result<string[], string> {
 /**
  * Validate a benchmark PRD object without loading from file
  */
-export function validateBenchmark(
-  data: unknown
-): Result<BenchmarkPRD, string> {
+export function validateBenchmark(data: unknown): Result<BenchmarkPRD, string> {
   const result = BenchmarkPRDSchema.safeParse(data);
   if (!result.success) {
     return err(`Validation failed: ${result.error.message}`);

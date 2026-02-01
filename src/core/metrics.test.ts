@@ -580,21 +580,36 @@ describe('MetricsCalculator', () => {
       calculator.recordSynthMeasurement(
         sessionId,
         'US-001',
-        createCodebaseSnapshot({ total: 100, code: 80, comments: 10, blank: 10 })
+        createCodebaseSnapshot({
+          total: 100,
+          code: 80,
+          comments: 10,
+          blank: 10,
+        })
       );
 
       collector.emit(createTokensInEvent(sessionId, 1000));
       calculator.recordSynthMeasurement(
         sessionId,
         'US-002',
-        createCodebaseSnapshot({ total: 150, code: 120, comments: 15, blank: 15 })
+        createCodebaseSnapshot({
+          total: 150,
+          code: 120,
+          comments: 15,
+          blank: 15,
+        })
       );
 
       collector.emit(createTokensInEvent(sessionId, 1000));
       calculator.recordSynthMeasurement(
         sessionId,
         'US-003',
-        createCodebaseSnapshot({ total: 200, code: 160, comments: 20, blank: 20 })
+        createCodebaseSnapshot({
+          total: 200,
+          code: 160,
+          comments: 20,
+          blank: 20,
+        })
       );
 
       const trend = calculator.getSynthTrend(sessionId);
@@ -613,7 +628,12 @@ describe('MetricsCalculator', () => {
       const result1 = calculator.recordSynthMeasurement(
         sessionId,
         'US-001',
-        createCodebaseSnapshot({ total: 100, code: 80, comments: 10, blank: 10 })
+        createCodebaseSnapshot({
+          total: 100,
+          code: 80,
+          comments: 10,
+          blank: 10,
+        })
       );
 
       expect(isOk(result1)).toBe(true);
@@ -631,7 +651,12 @@ describe('MetricsCalculator', () => {
       const result2 = calculator.recordSynthMeasurement(
         sessionId,
         'US-002',
-        createCodebaseSnapshot({ total: 150, code: 120, comments: 15, blank: 15 })
+        createCodebaseSnapshot({
+          total: 150,
+          code: 120,
+          comments: 15,
+          blank: 15,
+        })
       );
 
       expect(isOk(result2)).toBe(true);
@@ -653,7 +678,12 @@ describe('MetricsCalculator', () => {
       calculator.recordSynthMeasurement(
         sessionId,
         'US-001',
-        createCodebaseSnapshot({ total: 100, code: 80, comments: 10, blank: 10 })
+        createCodebaseSnapshot({
+          total: 100,
+          code: 80,
+          comments: 10,
+          blank: 10,
+        })
       );
 
       // Second story - refactored to 80 LOC (deleted 20 lines)
@@ -682,7 +712,12 @@ describe('MetricsCalculator', () => {
       calculator.recordSynthMeasurement(
         sessionId,
         'US-001',
-        createCodebaseSnapshot({ total: 100, code: 80, comments: 10, blank: 10 })
+        createCodebaseSnapshot({
+          total: 100,
+          code: 80,
+          comments: 10,
+          blank: 10,
+        })
       );
 
       // Story with no net LOC change (same LOC but different files maybe)
@@ -690,7 +725,12 @@ describe('MetricsCalculator', () => {
       const result = calculator.recordSynthMeasurement(
         sessionId,
         'US-002',
-        createCodebaseSnapshot({ total: 100, code: 80, comments: 10, blank: 10 })
+        createCodebaseSnapshot({
+          total: 100,
+          code: 80,
+          comments: 10,
+          blank: 10,
+        })
       );
 
       expect(isOk(result)).toBe(true);
@@ -1080,7 +1120,12 @@ describe('MetricsCalculator', () => {
       calculator.recordSynthMeasurement(
         sessionId,
         'US-001',
-        createCodebaseSnapshot({ total: 100, code: 80, comments: 10, blank: 10 })
+        createCodebaseSnapshot({
+          total: 100,
+          code: 80,
+          comments: 10,
+          blank: 10,
+        })
       );
 
       // Getting worse - 20 tokens per LOC
@@ -1088,7 +1133,12 @@ describe('MetricsCalculator', () => {
       calculator.recordSynthMeasurement(
         sessionId,
         'US-002',
-        createCodebaseSnapshot({ total: 200, code: 160, comments: 20, blank: 20 })
+        createCodebaseSnapshot({
+          total: 200,
+          code: 160,
+          comments: 20,
+          blank: 20,
+        })
       );
 
       // Very bad - 50 tokens per LOC (stuck on a problem)
@@ -1096,7 +1146,12 @@ describe('MetricsCalculator', () => {
       calculator.recordSynthMeasurement(
         sessionId,
         'US-003',
-        createCodebaseSnapshot({ total: 200, code: 160, comments: 20, blank: 20 })
+        createCodebaseSnapshot({
+          total: 200,
+          code: 160,
+          comments: 20,
+          blank: 20,
+        })
       );
 
       const trend = calculator.getSynthTrend(sessionId);

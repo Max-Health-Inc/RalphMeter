@@ -581,7 +581,10 @@ describe('RalphHooks', () => {
       });
 
       // Session end
-      await hooks.onSessionEnd({ success: true, reason: 'All stories complete' });
+      await hooks.onSessionEnd({
+        success: true,
+        reason: 'All stories complete',
+      });
 
       // Verify all events were sent (14 total: 1 session_start + 12 others + 1 session_end)
       expect(mockEvents.length).toBe(14);

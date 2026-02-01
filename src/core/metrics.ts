@@ -8,7 +8,11 @@
 import { type Result, ok, err } from '../shared/result.js';
 import { type EventCollector, type SessionMetrics } from './collector.js';
 import { type GateTracker, type SessionGateStats } from './gates.js';
-import { type LOCCounter, type CodebaseSnapshot, type LOCResult } from './loc.js';
+import {
+  type LOCCounter,
+  type CodebaseSnapshot,
+  type LOCResult,
+} from './loc.js';
 
 // ============================================================================
 // Types
@@ -255,12 +259,12 @@ export class MetricsCalculator {
     // Calculate per-story deltas
     const previousTokens = previous?.cumulativeTokens ?? 0;
     const previousLoc = previous?.loc ?? 0;
-    
+
     const tokensSpent = totalTokens - previousTokens;
     const linesAdded = loc > previousLoc ? loc - previousLoc : 0;
     const linesDeleted = loc < previousLoc ? previousLoc - loc : 0;
     const netDelta = linesAdded - linesDeleted;
-    
+
     // Calculate storySynth only if lines were added
     const storySynth = linesAdded > 0 ? tokensSpent / linesAdded : undefined;
 
@@ -362,9 +366,15 @@ export class MetricsCalculator {
     lines.push('');
 
     // Headline metrics
-    lines.push('┌─────────────────────────────────────────────────────────────┐');
-    lines.push('│ HEADLINE METRICS                                            │');
-    lines.push('├─────────────────────────────────────────────────────────────┤');
+    lines.push(
+      '┌─────────────────────────────────────────────────────────────┐'
+    );
+    lines.push(
+      '│ HEADLINE METRICS                                            │'
+    );
+    lines.push(
+      '├─────────────────────────────────────────────────────────────┤'
+    );
     lines.push(
       `│ Ralph (Tokens/LOC):     ${this.formatNumber(m.tokensPerLOC, 2).padStart(12)}                     │`
     );
@@ -377,13 +387,21 @@ export class MetricsCalculator {
     lines.push(
       `│ PoE-LOC:                ${this.formatPercent(m.poeLOC).padStart(12)}                     │`
     );
-    lines.push('└─────────────────────────────────────────────────────────────┘');
+    lines.push(
+      '└─────────────────────────────────────────────────────────────┘'
+    );
     lines.push('');
 
     // Time metrics
-    lines.push('┌─────────────────────────────────────────────────────────────┐');
-    lines.push('│ EFFICIENCY METRICS                                          │');
-    lines.push('├─────────────────────────────────────────────────────────────┤');
+    lines.push(
+      '┌─────────────────────────────────────────────────────────────┐'
+    );
+    lines.push(
+      '│ EFFICIENCY METRICS                                          │'
+    );
+    lines.push(
+      '├─────────────────────────────────────────────────────────────┤'
+    );
     lines.push(
       `│ Total Duration:         ${this.formatDuration(m.totalMinutes).padStart(12)}                     │`
     );
@@ -396,13 +414,21 @@ export class MetricsCalculator {
     lines.push(
       `│ Total Tokens:           ${this.formatNumber(m.totalTokens, 0).padStart(12)}                     │`
     );
-    lines.push('└─────────────────────────────────────────────────────────────┘');
+    lines.push(
+      '└─────────────────────────────────────────────────────────────┘'
+    );
     lines.push('');
 
     // LOC breakdown
-    lines.push('┌─────────────────────────────────────────────────────────────┐');
-    lines.push('│ LOC BREAKDOWN                                               │');
-    lines.push('├─────────────────────────────────────────────────────────────┤');
+    lines.push(
+      '┌─────────────────────────────────────────────────────────────┐'
+    );
+    lines.push(
+      '│ LOC BREAKDOWN                                               │'
+    );
+    lines.push(
+      '├─────────────────────────────────────────────────────────────┤'
+    );
     lines.push(
       `│ Total Lines:            ${String(m.totalLOC).padStart(12)}                     │`
     );
@@ -415,15 +441,23 @@ export class MetricsCalculator {
     lines.push(
       `│ Blank Lines:            ${String(m.blankLines).padStart(12)}                     │`
     );
-    lines.push('└─────────────────────────────────────────────────────────────┘');
+    lines.push(
+      '└─────────────────────────────────────────────────────────────┘'
+    );
     lines.push('');
 
     // Gate stats if available
     if (report.gateStats !== null) {
       const gs = report.gateStats;
-      lines.push('┌─────────────────────────────────────────────────────────────┐');
-      lines.push('│ GATE VERIFICATION                                           │');
-      lines.push('├─────────────────────────────────────────────────────────────┤');
+      lines.push(
+        '┌─────────────────────────────────────────────────────────────┐'
+      );
+      lines.push(
+        '│ GATE VERIFICATION                                           │'
+      );
+      lines.push(
+        '├─────────────────────────────────────────────────────────────┤'
+      );
       lines.push(
         `│ G1 (Compile):  ${String(gs.perGate.G1_COMPILE.linesPassed).padStart(6)}/${String(gs.perGate.G1_COMPILE.linesChecked).padEnd(6)} (${this.formatPercent(gs.perGate.G1_COMPILE.passRate).padStart(7)})          │`
       );
@@ -433,19 +467,29 @@ export class MetricsCalculator {
       lines.push(
         `│ G3 (Reach):    ${String(gs.perGate.G3_REACHABLE.linesPassed).padStart(6)}/${String(gs.perGate.G3_REACHABLE.linesChecked).padEnd(6)} (${this.formatPercent(gs.perGate.G3_REACHABLE.passRate).padStart(7)})          │`
       );
-      lines.push('├─────────────────────────────────────────────────────────────┤');
+      lines.push(
+        '├─────────────────────────────────────────────────────────────┤'
+      );
       lines.push(
         `│ Overall PoE:            ${this.formatPercent(gs.overallPoE).padStart(12)}                     │`
       );
-      lines.push('└─────────────────────────────────────────────────────────────┘');
+      lines.push(
+        '└─────────────────────────────────────────────────────────────┘'
+      );
       lines.push('');
     }
 
     // Ralph trend if available
     if (report.synthTrend.length > 0) {
-      lines.push('┌─────────────────────────────────────────────────────────────┐');
-      lines.push('│ Ralph TREND                                                 │');
-      lines.push('├─────────────────────────────────────────────────────────────┤');
+      lines.push(
+        '┌─────────────────────────────────────────────────────────────┐'
+      );
+      lines.push(
+        '│ Ralph TREND                                                 │'
+      );
+      lines.push(
+        '├─────────────────────────────────────────────────────────────┤'
+      );
 
       for (const point of report.synthTrend) {
         const delta =
@@ -455,27 +499,36 @@ export class MetricsCalculator {
         lines.push(
           `│ ${point.storyId.padEnd(12)} Ralph: ${this.formatNumber(point.Ralph, 2).padStart(8)} (${delta.padStart(8)})       │`
         );
-        
+
         // Show per-story details
         const netSign = point.netDelta >= 0 ? '+' : '';
-        const storySynthStr = point.storySynth !== undefined 
-          ? this.formatNumber(point.storySynth, 1)
-          : 'N/A';
+        const storySynthStr =
+          point.storySynth !== undefined
+            ? this.formatNumber(point.storySynth, 1)
+            : 'N/A';
         lines.push(
           `│   Tokens: ${String(point.tokensSpent).padStart(6)}  LOC: ${netSign}${String(point.netDelta).padStart(4)} (${String(point.linesAdded).padStart(3)}+/${String(point.linesDeleted).padStart(3)}-) S: ${storySynthStr.padStart(6)}  │`
         );
       }
 
-      lines.push('└─────────────────────────────────────────────────────────────┘');
+      lines.push(
+        '└─────────────────────────────────────────────────────────────┘'
+      );
       lines.push('');
     }
 
     // Session metrics if available
     if (report.sessionMetrics !== null) {
       const sm = report.sessionMetrics;
-      lines.push('┌─────────────────────────────────────────────────────────────┐');
-      lines.push('│ SESSION METRICS                                             │');
-      lines.push('├─────────────────────────────────────────────────────────────┤');
+      lines.push(
+        '┌─────────────────────────────────────────────────────────────┐'
+      );
+      lines.push(
+        '│ SESSION METRICS                                             │'
+      );
+      lines.push(
+        '├─────────────────────────────────────────────────────────────┤'
+      );
       lines.push(
         `│ Iterations:             ${String(sm.totalIterations).padStart(12)}                     │`
       );
@@ -488,7 +541,9 @@ export class MetricsCalculator {
       lines.push(
         `│ Stories:                ${String(sm.storiesPassed).padStart(12)} / ${String(sm.storiesCompleted).padEnd(12)}   │`
       );
-      lines.push('└─────────────────────────────────────────────────────────────┘');
+      lines.push(
+        '└─────────────────────────────────────────────────────────────┘'
+      );
     }
 
     lines.push('');
@@ -509,7 +564,8 @@ export class MetricsCalculator {
     endedAt?: string
   ): number {
     const start = new Date(startedAt).getTime();
-    const end = endedAt !== undefined ? new Date(endedAt).getTime() : Date.now();
+    const end =
+      endedAt !== undefined ? new Date(endedAt).getTime() : Date.now();
     const durationMs = end - start;
     return durationMs / (1000 * 60);
   }

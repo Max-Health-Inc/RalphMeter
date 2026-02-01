@@ -5,9 +5,5 @@
  * for verifying G3 (Reachable) gate in the 3-gate verification model.
  */
 
-export type {
-  Line,
-  CoverageData,
-  InstrumentedOptions,
-} from './coverage.js';
+export type { Line, CoverageData, InstrumentedOptions } from './coverage.js';
 export { CoverageCollector } from './coverage.js';

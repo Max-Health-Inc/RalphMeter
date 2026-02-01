@@ -182,41 +182,57 @@ export class BenchmarkComparison {
     lines.push('');
 
     // Header
-    lines.push('┌─────────────────────────────────────────────────────────────┐');
-    lines.push('│ BENCHMARK INFORMATION                                       │');
-    lines.push('├─────────────────────────────────────────────────────────────┤');
     lines.push(
-      `│ Benchmark:   ${report.benchmarkName.padEnd(47)}│`
+      '┌─────────────────────────────────────────────────────────────┐'
     );
     lines.push(
-      `│ Session:     ${report.sessionId.padEnd(47)}│`
+      '│ BENCHMARK INFORMATION                                       │'
     );
+    lines.push(
+      '├─────────────────────────────────────────────────────────────┤'
+    );
+    lines.push(`│ Benchmark:   ${report.benchmarkName.padEnd(47)}│`);
+    lines.push(`│ Session:     ${report.sessionId.padEnd(47)}│`);
     lines.push(
       `│ Complexity:  ${String(report.benchmarkMetadata.complexityScore).padEnd(1)}/10                                             │`
     );
-    lines.push('└─────────────────────────────────────────────────────────────┘');
+    lines.push(
+      '└─────────────────────────────────────────────────────────────┘'
+    );
     lines.push('');
 
     // Efficiency Score
-    lines.push('┌─────────────────────────────────────────────────────────────┐');
-    lines.push('│ EFFICIENCY SCORE                                            │');
-    lines.push('├─────────────────────────────────────────────────────────────┤');
     lines.push(
-      `│ Grade:       ${report.efficiencyScore.grade.padEnd(47)}│`
+      '┌─────────────────────────────────────────────────────────────┐'
     );
+    lines.push(
+      '│ EFFICIENCY SCORE                                            │'
+    );
+    lines.push(
+      '├─────────────────────────────────────────────────────────────┤'
+    );
+    lines.push(`│ Grade:       ${report.efficiencyScore.grade.padEnd(47)}│`);
     lines.push(
       `│ Ratio:       ${report.efficiencyScore.ratio.toFixed(2).padEnd(47)}│`
     );
     lines.push(
       `│ Result:      ${(report.efficiencyScore.pass ? '✓ PASS' : '✗ FAIL').padEnd(47)}│`
     );
-    lines.push('└─────────────────────────────────────────────────────────────┘');
+    lines.push(
+      '└─────────────────────────────────────────────────────────────┘'
+    );
     lines.push('');
 
     // Metric Comparisons
-    lines.push('┌─────────────────────────────────────────────────────────────┐');
-    lines.push('│ METRIC COMPARISONS                                          │');
-    lines.push('├─────────────────────────────────────────────────────────────┤');
+    lines.push(
+      '┌─────────────────────────────────────────────────────────────┐'
+    );
+    lines.push(
+      '│ METRIC COMPARISONS                                          │'
+    );
+    lines.push(
+      '├─────────────────────────────────────────────────────────────┤'
+    );
 
     const metrics = [
       report.locComparison,
@@ -235,14 +251,22 @@ export class BenchmarkComparison {
       );
     }
 
-    lines.push('└─────────────────────────────────────────────────────────────┘');
+    lines.push(
+      '└─────────────────────────────────────────────────────────────┘'
+    );
     lines.push('');
 
     // Recommendations
     if (report.recommendations.length > 0) {
-      lines.push('┌─────────────────────────────────────────────────────────────┐');
-      lines.push('│ RECOMMENDATIONS                                             │');
-      lines.push('├─────────────────────────────────────────────────────────────┤');
+      lines.push(
+        '┌─────────────────────────────────────────────────────────────┐'
+      );
+      lines.push(
+        '│ RECOMMENDATIONS                                             │'
+      );
+      lines.push(
+        '├─────────────────────────────────────────────────────────────┤'
+      );
 
       for (const rec of report.recommendations) {
         const icon =
@@ -266,7 +290,9 @@ export class BenchmarkComparison {
         }
       }
 
-      lines.push('└─────────────────────────────────────────────────────────────┘');
+      lines.push(
+        '└─────────────────────────────────────────────────────────────┘'
+      );
       lines.push('');
     }
 

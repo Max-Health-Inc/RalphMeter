@@ -171,12 +171,9 @@ describe('CoverageCollector', () => {
         'test-fixtures',
         'sample-app.js'
       );
-      const startResult = collector.startInstrumented(
-        `node ${sampleAppPath}`,
-        {
-          coverageDir: testCoverageDir,
-        }
-      );
+      const startResult = collector.startInstrumented(`node ${sampleAppPath}`, {
+        coverageDir: testCoverageDir,
+      });
       expect(isOk(startResult)).toBe(true);
 
       // Wait for the app to complete and c8 to write files (sample app exits after 100ms)
@@ -211,12 +208,9 @@ describe('CoverageCollector', () => {
         'test-fixtures',
         'sample-app.js'
       );
-      const startResult = collector.startInstrumented(
-        `node ${sampleAppPath}`,
-        {
-          coverageDir: testCoverageDir,
-        }
-      );
+      const startResult = collector.startInstrumented(`node ${sampleAppPath}`, {
+        coverageDir: testCoverageDir,
+      });
       expect(isOk(startResult)).toBe(true);
 
       // Wait for the app to complete (sample app exits after 100ms)
@@ -251,12 +245,9 @@ describe('CoverageCollector', () => {
         'test-fixtures',
         'sample-app.js'
       );
-      const startResult = collector.startInstrumented(
-        `node ${sampleAppPath}`,
-        {
-          coverageDir: testCoverageDir,
-        }
-      );
+      const startResult = collector.startInstrumented(`node ${sampleAppPath}`, {
+        coverageDir: testCoverageDir,
+      });
       expect(isOk(startResult)).toBe(true);
 
       // Wait for the app to complete (sample app exits after 100ms)
@@ -307,12 +298,9 @@ describe('CoverageCollector', () => {
         'test-fixtures',
         'sample-app.js'
       );
-      const startResult = collector.startInstrumented(
-        `node ${sampleAppPath}`,
-        {
-          coverageDir: testCoverageDir,
-        }
-      );
+      const startResult = collector.startInstrumented(`node ${sampleAppPath}`, {
+        coverageDir: testCoverageDir,
+      });
       expect(isOk(startResult)).toBe(true);
 
       // Wait for the app to complete (sample app exits after 100ms)
@@ -374,7 +362,9 @@ describe('CoverageCollector', () => {
     });
 
     it('should not throw if directory does not exist', () => {
-      expect(() => { collector.cleanup(); }).not.toThrow();
+      expect(() => {
+        collector.cleanup();
+      }).not.toThrow();
     });
   });
 });

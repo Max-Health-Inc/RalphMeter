@@ -335,7 +335,10 @@ export function createRalphHooks(
             `[RalphHooks] Session creation timeout after ${String(timeout)}ms`
           );
         } else {
-          console.error('[RalphHooks] Failed to create session:', error.message);
+          console.error(
+            '[RalphHooks] Failed to create session:',
+            error.message
+          );
         }
       }
       // Don't throw - we don't want hook failures to crash Ralph

@@ -282,7 +282,7 @@ describe('Export Module', () => {
       // Should not throw
       const validated = validateExport(result.value);
       expect(validated).toBeTruthy();
-      expect(validated.version).toBe('v1');
+      expect((validated as { version: string }).version).toBe('v1');
     });
 
     it('should throw on invalid export object', () => {

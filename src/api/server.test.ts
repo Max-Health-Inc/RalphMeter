@@ -22,7 +22,7 @@ describe('RalphMeterServer', () => {
   describe('GET /health', () => {
     it('should return health status', async () => {
       const response = await request.get('/health');
-      
+
       expect(response.status).toBe(200);
       expect(response.body).toEqual({
         status: 'ok',
@@ -37,9 +37,7 @@ describe('RalphMeterServer', () => {
 
   describe('POST /api/sessions', () => {
     it('should create a new session without tags', async () => {
-      const response = await request
-        .post('/api/sessions')
-        .send({});
+      const response = await request.post('/api/sessions').send({});
 
       expect(response.status).toBe(201);
       expect(response.body).toMatchObject({
@@ -52,9 +50,7 @@ describe('RalphMeterServer', () => {
 
     it('should create a new session with tags', async () => {
       const tags = { mode: 'wiggum', methodology: 'tdd' };
-      const response = await request
-        .post('/api/sessions')
-        .send({ tags });
+      const response = await request.post('/api/sessions').send({ tags });
 
       expect(response.status).toBe(201);
       expect(response.body).toMatchObject({
@@ -99,9 +95,9 @@ describe('RalphMeterServer', () => {
         timestamp: new Date().toISOString(),
         sessionId,
         eventType: 'iteration_start',
-        payload: { 
+        payload: {
           iterationNumber: 1,
-          storyId: 'US-001' 
+          storyId: 'US-001',
         },
       };
 
@@ -138,14 +134,14 @@ describe('RalphMeterServer', () => {
     it('should reject event with mismatched sessionId', async () => {
       // Use a different but valid UUID
       const differentSessionId = crypto.randomUUID();
-      
+
       const event = {
         timestamp: new Date().toISOString(),
         sessionId: differentSessionId,
         eventType: 'iteration_start',
-        payload: { 
+        payload: {
           iterationNumber: 1,
-          storyId: 'US-001' 
+          storyId: 'US-001',
         },
       };
 
@@ -277,9 +273,9 @@ describe('RalphMeterServer', () => {
           timestamp: new Date().toISOString(),
           sessionId,
           eventType: 'iteration_start',
-          payload: { 
+          payload: {
             iterationNumber: 1,
-            storyId: 'US-001' 
+            storyId: 'US-001',
           },
         },
       });
@@ -317,9 +313,9 @@ describe('RalphMeterServer', () => {
           timestamp: new Date().toISOString(),
           sessionId,
           eventType: 'iteration_start',
-          payload: { 
+          payload: {
             iterationNumber: 1,
-            storyId: 'US-001' 
+            storyId: 'US-001',
           },
         },
       });
@@ -347,10 +343,10 @@ describe('RalphMeterServer', () => {
           timestamp: new Date().toISOString(),
           sessionId,
           eventType: 'iteration_end',
-          payload: { 
+          payload: {
             iterationNumber: 1,
             storyId: 'US-001',
-            success: true
+            success: true,
           },
         },
       });
@@ -439,9 +435,9 @@ describe('RalphMeterServer', () => {
           timestamp: new Date().toISOString(),
           sessionId,
           eventType: 'iteration_start',
-          payload: { 
+          payload: {
             iterationNumber: 1,
-            storyId: 'US-001' 
+            storyId: 'US-001',
           },
         },
       });
@@ -481,11 +477,11 @@ describe('RalphMeterServer', () => {
           timestamp: new Date().toISOString(),
           sessionId,
           eventType: 'test_result',
-          payload: { 
-            success: true, 
+          payload: {
+            success: true,
             totalTests: 10,
-            passed: 10, 
-            failed: 0
+            passed: 10,
+            failed: 0,
           },
         },
       });
@@ -496,10 +492,10 @@ describe('RalphMeterServer', () => {
           timestamp: new Date().toISOString(),
           sessionId,
           eventType: 'iteration_end',
-          payload: { 
+          payload: {
             iterationNumber: 1,
             storyId: 'US-001',
-            success: true
+            success: true,
           },
         },
       });

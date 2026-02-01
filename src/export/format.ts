@@ -7,7 +7,10 @@
 
 import { z } from 'zod';
 import { type MeterEvent } from '../core/events.js';
-import { type SessionMetadata, type SessionMetrics } from '../core/collector.js';
+import {
+  type SessionMetadata,
+  type SessionMetrics,
+} from '../core/collector.js';
 import { type ComputedMetrics, type SynthTrendPoint } from '../core/metrics.js';
 import { type SessionGateStats } from '../core/gates.js';
 import { type LOCResult } from '../core/loc.js';
@@ -135,7 +138,10 @@ const GateStatsSchema = z.object({
  * Schema for SessionGateStats
  */
 const SessionGateStatsSchema = z.object({
-  perGate: z.record(z.enum(['G1_COMPILE', 'G2_CORRECT', 'G3_REACHABLE']), GateStatsSchema),
+  perGate: z.record(
+    z.enum(['G1_COMPILE', 'G2_CORRECT', 'G3_REACHABLE']),
+    GateStatsSchema
+  ),
   totalLinesChecked: z.number(),
   verifiedLines: z.number(),
   overallPoE: z.number(),
@@ -159,13 +165,17 @@ export const RalphMeterExportSchema = z.object({
 /**
  * Validate an export object
  */
-export function validateExport(data: unknown) {
+export function validateExport(data: unknown): unknown {
   return RalphMeterExportSchema.parse(data);
 }
 
 /**
  * Safely validate an export object
  */
-export function safeValidateExport(data: unknown) {
+export function safeValidateExport(data: unknown): {
+  success: boolean;
+  data?: unknown;
+  error?: unknown;
+} {
   return RalphMeterExportSchema.safeParse(data);
 }

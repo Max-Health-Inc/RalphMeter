@@ -7,17 +7,18 @@
  * - Retrieving metrics and reports
  */
 
-import express, { type Request, type Response, type NextFunction } from 'express';
+import express, {
+  type Request,
+  type Response,
+  type NextFunction,
+} from 'express';
 import cors from 'cors';
 import { z } from 'zod';
 import { EventCollector } from '../core/collector.js';
 import { GateTracker } from '../core/gates.js';
 import { LOCCounter } from '../core/loc.js';
 import { MetricsCalculator } from '../core/metrics.js';
-import { 
-  safeValidateEvent,
-  type MeterEvent 
-} from '../core/events.js';
+import { safeValidateEvent, type MeterEvent } from '../core/events.js';
 import { exportSession as exportSessionData } from '../export/exporter.js';
 
 // ============================================================================
@@ -201,21 +202,27 @@ export class RalphMeterServer {
     });
 
     // Global error handler
-    this.app.use((err: Error, _req: Request, res: Response, _next: NextFunction) => {
-      console.error('Server error:', err);
-      res.status(500).json({
-        error: 'Internal Server Error',
-        code: 'INTERNAL_ERROR',
-        details: err.message,
-      } satisfies ApiError);
-    });
+    this.app.use(
+      (err: Error, _req: Request, res: Response, _next: NextFunction) => {
+        console.error('Server error:', err);
+        res.status(500).json({
+          error: 'Internal Server Error',
+          code: 'INTERNAL_ERROR',
+          details: err.message,
+        } satisfies ApiError);
+      }
+    );
   }
 
   /**
    * Wraps async route handlers to catch errors
    */
   private asyncHandler(
-    fn: (req: Request, res: Response, next: NextFunction) => Promise<void> | void
+    fn: (
+      req: Request,
+      res: Response,
+      next: NextFunction
+    ) => Promise<void> | void
   ): (req: Request, res: Response, next: NextFunction) => void {
     return (req: Request, res: Response, next: NextFunction) => {
       Promise.resolve(fn(req, res, next)).catch(next);
@@ -449,7 +456,10 @@ export class RalphMeterServer {
     // If rootPath provided, calculate full metrics with LOC snapshot
     if (rootPath !== undefined) {
       const snapshot = this.locCounter.snapshotCodebase(rootPath);
-      const reportResult = this.metricsCalculator.getReport(sessionId, snapshot);
+      const reportResult = this.metricsCalculator.getReport(
+        sessionId,
+        snapshot
+      );
 
       if (!reportResult.ok) {
         res.status(500).json({
@@ -510,7 +520,8 @@ export class RalphMeterServer {
     );
 
     if (!exportResult.ok) {
-      const statusCode = exportResult.error.code === 'SESSION_NOT_FOUND' ? 404 : 500;
+      const statusCode =
+        exportResult.error.code === 'SESSION_NOT_FOUND' ? 404 : 500;
       res.status(statusCode).json({
         error: exportResult.error.message,
         code: exportResult.error.code,
