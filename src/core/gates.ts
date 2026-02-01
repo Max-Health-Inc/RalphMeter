@@ -16,12 +16,16 @@ import { type Result, ok, err } from '../shared/result.js';
 /**
  * The three verification gates
  */
-export type Gate = 'G1_COMPILE' | 'G2_CORRECT' | 'G3_REACHABLE';
+export type CoreGate = 'G1_COMPILE' | 'G2_CORRECT' | 'G3_REACHABLE';
 
 /**
  * All gate types as an array for iteration
  */
-export const ALL_GATES: Gate[] = ['G1_COMPILE', 'G2_CORRECT', 'G3_REACHABLE'];
+export const ALL_GATES: CoreGate[] = [
+  'G1_COMPILE',
+  'G2_CORRECT',
+  'G3_REACHABLE',
+];
 
 /**
  * Identifies a specific line in a file
@@ -40,7 +44,7 @@ export interface LineCheckResult {
   /** The line location */
   location: LineLocation;
   /** The gate being checked */
-  gate: Gate;
+  gate: CoreGate;
   /** Whether the line passed this gate */
   passed: boolean;
   /** Optional error message if failed */
@@ -62,7 +66,7 @@ export interface GateConfig {
 /**
  * Configuration for all gates
  */
-export interface GateConfiguration {
+export interface CoreGateConfiguration {
   G1_COMPILE: GateConfig;
   G2_CORRECT: GateConfig;
   G3_REACHABLE: GateConfig;
@@ -103,7 +107,7 @@ export interface LineVerificationStatus {
  */
 export interface SessionGateStats {
   /** Stats per gate */
-  perGate: Record<Gate, GateStats>;
+  perGate: Record<CoreGate, GateStats>;
   /** Total unique lines checked across all gates */
   totalLinesChecked: number;
   /** Lines that passed ALL applicable gates */
@@ -121,7 +125,7 @@ export interface GateVerificationResult {
   /** Timestamp of the recording */
   timestamp: string;
   /** The gate this result is for */
-  gate: Gate;
+  gate: CoreGate;
   /** File path */
   filePath: string;
   /** Line results */
@@ -147,7 +151,7 @@ export interface GateTrackerError {
 /**
  * Default gate configuration - all gates required with 100% threshold
  */
-export const DEFAULT_GATE_CONFIG: GateConfiguration = {
+export const DEFAULT_GATE_CONFIG: CoreGateConfiguration = {
   G1_COMPILE: { required: true, threshold: 1.0, skip: false },
   G2_CORRECT: { required: true, threshold: 1.0, skip: false },
   G3_REACHABLE: { required: true, threshold: 1.0, skip: false },
@@ -162,7 +166,7 @@ export const DEFAULT_GATE_CONFIG: GateConfiguration = {
  */
 export class GateTracker {
   /** Gate configuration */
-  private config: GateConfiguration;
+  private config: CoreGateConfiguration;
 
   /** Stored results by session */
   private results = new Map<string, GateVerificationResult[]>();
@@ -170,7 +174,7 @@ export class GateTracker {
   /**
    * Creates a new GateTracker with optional custom configuration
    */
-  constructor(config?: Partial<GateConfiguration>) {
+  constructor(config?: Partial<CoreGateConfiguration>) {
     this.config = {
       G1_COMPILE: { ...DEFAULT_GATE_CONFIG.G1_COMPILE, ...config?.G1_COMPILE },
       G2_CORRECT: { ...DEFAULT_GATE_CONFIG.G2_CORRECT, ...config?.G2_CORRECT },
@@ -243,7 +247,7 @@ export class GateTracker {
    */
   getGateStats(
     sessionId: string,
-    gate: Gate
+    gate: CoreGate
   ): Result<GateStats, GateTrackerError> {
     const resultsResult = this.getResults(sessionId);
     if (!resultsResult.ok) {
@@ -298,7 +302,7 @@ export class GateTracker {
     }
 
     // Calculate per-gate stats
-    const perGate: Record<Gate, GateStats> = {
+    const perGate: Record<CoreGate, GateStats> = {
       G1_COMPILE: { linesChecked: 0, linesPassed: 0, passRate: 1, poe: 0 },
       G2_CORRECT: { linesChecked: 0, linesPassed: 0, passRate: 1, poe: 0 },
       G3_REACHABLE: { linesChecked: 0, linesPassed: 0, passRate: 1, poe: 0 },
@@ -385,7 +389,7 @@ export class GateTracker {
   /**
    * Gets the current gate configuration
    */
-  getConfig(): GateConfiguration {
+  getConfig(): CoreGateConfiguration {
     return { ...this.config };
   }
 
@@ -395,8 +399,8 @@ export class GateTracker {
    * @param config - Partial configuration to merge
    */
   setConfig(
-    config: Partial<GateConfiguration>
-  ): Result<GateConfiguration, GateTrackerError> {
+    config: Partial<CoreGateConfiguration>
+  ): Result<CoreGateConfiguration, GateTrackerError> {
     // Validate thresholds
     for (const gate of ALL_GATES) {
       const gateConfig = config[gate];

@@ -26,3 +26,6 @@ export * from './export/index.js';
 
 // Export explorer module
 export * from './explorer/index.js';
+
+// Export gates module
+export * from './gates/index.js';

@@ -7,7 +7,7 @@ import {
   GateTracker,
   ALL_GATES,
   DEFAULT_GATE_CONFIG,
-  type Gate,
+  type CoreGate,
   type GateVerificationResult,
 } from './gates.js';
 import { isOk, isErr } from '../shared/result.js';
@@ -60,7 +60,7 @@ function createRuntimeCoverageResult(
 // ============================================================================
 
 describe('GateTracker', () => {
-  let tracker: GateTracker;
+  let tracker: CoreGateTracker;
 
   beforeEach(() => {
     tracker = new GateTracker();
@@ -162,7 +162,7 @@ describe('GateTracker', () => {
     it('rejects invalid gate type', () => {
       const invalidResult = {
         timestamp: validTimestamp,
-        gate: 'INVALID_GATE' as Gate,
+        gate: 'INVALID_GATE' as CoreGate,
         filePath: 'src/index.ts',
         lineResults: [],
       };
