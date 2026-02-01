@@ -298,3 +298,29 @@ it passes ALL applicable gates. Dead code and untested code are properly exclude
   - Type guards using 'status is BarrierType' provide type narrowing for status code checks
   - Array filter with type guards ensures categorized arrays have correct types
 ---
+
+## 2026-02-01 - US-015
+- Implemented: AI Explorer - Exploration Modes
+- Files changed:
+  - Modified src/explorer/surface.ts - Added ExplorationMode type, ExplorationCredentials interface, mode support to ExploreOptions, exploreAll() method, authenticate() method, MergedExplorationLog type
+  - Modified src/explorer/test-fixtures/test-server.js - Added login functionality, session management, auth-protected routes (/protected, /admin), cookie handling
+  - Modified src/explorer/surface.test.ts - Added comprehensive tests for all exploration modes (12 new tests)
+  - Modified src/types/index.ts - Added new type exports for exploration modes
+  - Modified prd.json - Marked US-015 as passes: true
+- **Learnings for future iterations:**
+  - Exploration modes enable different authentication levels: anonymous (no auth), authenticated (user), privileged (admin), full (all modes)
+  - The exploreAll() method runs multiple modes sequentially and merges results (URLs, actions, responses)
+  - Credentials structure supports both user and admin credentials with optional login URL and form selectors
+  - Authentication uses Playwright to fill login forms automatically based on configurable selectors
+  - Full mode is accessed via exploreAll() method, not explore() with mode='full'
+  - Modes are skipped if required credentials are not provided (graceful degradation)
+  - Test server uses simple cookie-based session management for testing auth flows
+  - Login credentials: user/password123 for authenticated mode, admin/admin123 for privileged mode
+  - Session tracking uses Set for in-memory session storage in test server
+  - Cookie parsing and role checking enable auth barrier simulation
+  - MergedExplorationLog includes individual logs for each mode plus combined results
+  - Playwright's locator().first() and count() methods are useful for checking element existence
+  - Authentication happens before exploration starts for authenticated/privileged modes
+  - Password values are masked in action logs (shown as '***') for security
+  - Login form submission triggers navigation which requires waitForLoadState
+---

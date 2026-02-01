@@ -4,6 +4,9 @@
 
 import { createServer } from 'http';
 
+// Simple in-memory session store
+const sessions = new Set();
+
 const html = `
 <!DOCTYPE html>
 <html>
@@ -25,6 +28,23 @@ const html = `
   <a href="/page2">Go to Page 2</a>
   <a href="/page3">Go to Page 3</a>
   <a href="https://example.com">External Link</a>
+</body>
+</html>
+`;
+
+const loginHtml = `
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Login</title>
+</head>
+<body>
+  <h1>Login</h1>
+  <form id="login-form" action="/login" method="post">
+    <input type="text" name="username" placeholder="Username" required />
+    <input type="password" name="password" placeholder="Password" required />
+    <button type="submit">Login</button>
+  </form>
 </body>
 </html>
 `;
@@ -58,7 +78,60 @@ const page3Html = `
 </html>
 `;
 
-const server = createServer((req, res) => {
+const protectedHtml = `
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Protected Page</title>
+</head>
+<body>
+  <h1>Protected Page</h1>
+  <p>You are authenticated!</p>
+  <a href="/">Back to Home</a>
+</body>
+</html>
+`;
+
+const adminHtml = `
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Admin Page</title>
+</head>
+<body>
+  <h1>Admin Page</h1>
+  <p>You have admin privileges!</p>
+  <a href="/">Back to Home</a>
+</body>
+</html>
+`;
+
+// Parse cookies from request
+function parseCookies(req) {
+  const cookies = {};
+  const cookieHeader = req.headers.cookie;
+  if (cookieHeader) {
+    cookieHeader.split(';').forEach(cookie => {
+      const [name, value] = cookie.trim().split('=');
+      cookies[name] = value;
+    });
+  }
+  return cookies;
+}
+
+// Check if session is valid
+function isAuthenticated(req) {
+  const cookies = parseCookies(req);
+  return sessions.has(cookies.sessionId);
+}
+
+// Check if session has admin role
+function isAdmin(req) {
+  const cookies = parseCookies(req);
+  return cookies.role === 'admin' && sessions.has(cookies.sessionId);
+}
+
+const server = createServer(async (req, res) => {
   const url = req.url || '/';
 
   // CORS headers
@@ -75,22 +148,72 @@ const server = createServer((req, res) => {
   if (url === '/') {
     res.writeHead(200, { 'Content-Type': 'text/html' });
     res.end(html);
+  } else if (url === '/login' && req.method === 'GET') {
+    res.writeHead(200, { 'Content-Type': 'text/html' });
+    res.end(loginHtml);
+  } else if (url === '/login' && req.method === 'POST') {
+    // Parse POST body
+    let body = '';
+    req.on('data', chunk => {
+      body += chunk.toString();
+    });
+    req.on('end', () => {
+      // Simple credential check
+      const params = new URLSearchParams(body);
+      const username = params.get('username');
+      const password = params.get('password');
+
+      let role = 'user';
+      if (username === 'admin' && password === 'admin123') {
+        role = 'admin';
+      } else if (username !== 'user' || password !== 'password123') {
+        res.writeHead(401, { 'Content-Type': 'text/plain' });
+        res.end('Invalid credentials');
+        return;
+      }
+
+      // Create session
+      const sessionId = Math.random().toString(36).substring(7);
+      sessions.add(sessionId);
+
+      // Set cookie and redirect
+      res.writeHead(302, {
+        'Set-Cookie': [`sessionId=${sessionId}; Path=/`, `role=${role}; Path=/`],
+        'Location': '/'
+      });
+      res.end();
+    });
   } else if (url === '/page2') {
     res.writeHead(200, { 'Content-Type': 'text/html' });
     res.end(page2Html);
   } else if (url === '/page3') {
     res.writeHead(200, { 'Content-Type': 'text/html' });
     res.end(page3Html);
+  } else if (url === '/protected') {
+    if (isAuthenticated(req)) {
+      res.writeHead(200, { 'Content-Type': 'text/html' });
+      res.end(protectedHtml);
+    } else {
+      res.writeHead(401, { 'Content-Type': 'text/plain' });
+      res.end('Unauthorized');
+    }
+  } else if (url === '/admin') {
+    if (isAdmin(req)) {
+      res.writeHead(200, { 'Content-Type': 'text/html' });
+      res.end(adminHtml);
+    } else if (isAuthenticated(req)) {
+      res.writeHead(403, { 'Content-Type': 'text/plain' });
+      res.end('Forbidden');
+    } else {
+      res.writeHead(401, { 'Content-Type': 'text/plain' });
+      res.end('Unauthorized');
+    }
   } else if (url === '/submit' && req.method === 'POST') {
     res.writeHead(200, { 'Content-Type': 'application/json' });
     res.end(JSON.stringify({ success: true }));
   } else if (url === '/api/data') {
     res.writeHead(200, { 'Content-Type': 'application/json' });
     res.end(JSON.stringify({ data: 'test' }));
-  } else if (url === '/protected') {
-    // Simulates an auth-protected endpoint
-    res.writeHead(401, { 'Content-Type': 'text/plain' });
-    res.end('Unauthorized');
   } else {
     res.writeHead(404, { 'Content-Type': 'text/plain' });
     res.end('Not Found');

@@ -15,9 +15,44 @@ import { type Result, ok, err } from '../shared/result.js';
 // ============================================================================
 
 /**
+ * Exploration mode determines authentication level
+ */
+export type ExplorationMode =
+  | 'anonymous'
+  | 'authenticated'
+  | 'privileged'
+  | 'full';
+
+/**
+ * Credentials for exploration modes
+ */
+export interface ExplorationCredentials {
+  /** User credentials for authenticated mode */
+  user?: {
+    username: string;
+    password: string;
+  };
+  /** Admin credentials for privileged mode */
+  admin?: {
+    username: string;
+    password: string;
+  };
+  /** Optional login URL (defaults to baseUrl + '/login') */
+  loginUrl?: string;
+  /** Optional selectors for login form */
+  selectors?: {
+    usernameField?: string;
+    passwordField?: string;
+    submitButton?: string;
+  };
+}
+
+/**
  * Options for surface exploration
  */
 export interface ExploreOptions {
+  /** Exploration mode (default: 'anonymous') */
+  mode?: ExplorationMode;
   /** Maximum time to explore in milliseconds (default: 60000 = 1 minute) */
   timeout?: number;
   /** Maximum depth of navigation (default: 3) */
@@ -32,11 +67,8 @@ export interface ExploreOptions {
   actionDelay?: number;
   /** Additional headers to send with requests */
   extraHeaders?: Record<string, string>;
-  /** Credentials for authenticated exploration */
-  credentials?: {
-    username: string;
-    password: string;
-  };
+  /** Credentials for authenticated/privileged exploration */
+  credentials?: ExplorationCredentials;
 }
 
 /**
@@ -77,6 +109,8 @@ export interface CapturedResponse {
 export interface ExplorationLog {
   /** Base URL that was explored */
   baseUrl: string;
+  /** Exploration mode used */
+  mode: ExplorationMode;
   /** URLs visited during exploration */
   urlsVisited: string[];
   /** Actions taken during exploration */
@@ -89,6 +123,30 @@ export interface ExplorationLog {
   success: boolean;
   /** Error message if exploration failed */
   error?: string;
+}
+
+/**
+ * Merged exploration log from multiple modes
+ */
+export interface MergedExplorationLog {
+  /** Base URL that was explored */
+  baseUrl: string;
+  /** Modes that were executed */
+  modes: ExplorationMode[];
+  /** Combined URLs visited across all modes */
+  urlsVisited: string[];
+  /** Combined actions taken across all modes */
+  actions: ExplorationAction[];
+  /** Combined HTTP responses received across all modes */
+  responses: CapturedResponse[];
+  /** Individual logs for each mode */
+  modeLogs: Record<ExplorationMode, ExplorationLog | null>;
+  /** Total exploration time in milliseconds across all modes */
+  duration: number;
+  /** Whether all mode explorations completed successfully */
+  success: boolean;
+  /** Error messages if any mode failed */
+  errors?: string[];
 }
 
 // ============================================================================
@@ -116,6 +174,13 @@ export class SurfaceExplorer {
     baseUrl: string,
     options: ExploreOptions = {}
   ): Promise<Result<ExplorationLog, string>> {
+    const mode = options.mode ?? 'anonymous';
+
+    // If mode is 'full', run all modes sequentially and merge results
+    if (mode === 'full') {
+      return err('Use exploreAll() method for full mode exploration');
+    }
+
     const startTime = Date.now();
 
     try {
@@ -134,6 +199,15 @@ export class SurfaceExplorer {
       // Set up response listener
       this.setupResponseListener();
 
+      // Perform authentication if needed
+      if (mode === 'authenticated' || mode === 'privileged') {
+        const authResult = await this.authenticate(baseUrl, mode, options);
+        if (!authResult.ok) {
+          await this.cleanup();
+          return err(`Authentication failed: ${authResult.error}`);
+        }
+      }
+
       // Start exploration
       await this.explorePage(baseUrl, options.maxDepth ?? 3, 0);
 
@@ -144,6 +218,7 @@ export class SurfaceExplorer {
 
       return ok({
         baseUrl,
+        mode,
         urlsVisited: Array.from(this.visitedUrls),
         actions: this.actions,
         responses: this.responses,
@@ -159,6 +234,84 @@ export class SurfaceExplorer {
 
       return err(errorMessage);
     }
+  }
+
+  /**
+   * Run exploration in all modes sequentially and merge results
+   *
+   * @param baseUrl - Starting URL to explore
+   * @param options - Exploration configuration
+   * @returns Result with merged exploration log or error
+   */
+  async exploreAll(
+    baseUrl: string,
+    options: ExploreOptions = {}
+  ): Promise<Result<MergedExplorationLog, string>> {
+    const startTime = Date.now();
+    const modes: ExplorationMode[] = [
+      'anonymous',
+      'authenticated',
+      'privileged',
+    ];
+    const modeLogs: Record<ExplorationMode, ExplorationLog | null> = {
+      anonymous: null,
+      authenticated: null,
+      privileged: null,
+      full: null,
+    };
+
+    const allUrls = new Set<string>();
+    const allActions: ExplorationAction[] = [];
+    const allResponses: CapturedResponse[] = [];
+    const errors: string[] = [];
+
+    // Run each mode
+    for (const mode of modes) {
+      // Skip if credentials not provided
+      if (mode === 'authenticated' && !options.credentials?.user) {
+        continue;
+      }
+      if (mode === 'privileged' && !options.credentials?.admin) {
+        continue;
+      }
+
+      // Run exploration in this mode
+      const modeOptions = { ...options, mode };
+      const result = await this.explore(baseUrl, modeOptions);
+
+      if (result.ok) {
+        const log = result.value;
+        modeLogs[mode] = log;
+
+        // Merge results
+        log.urlsVisited.forEach((url) => allUrls.add(url));
+        allActions.push(...log.actions);
+        allResponses.push(...log.responses);
+      } else {
+        errors.push(`${mode}: ${result.error}`);
+      }
+    }
+
+    const duration = Date.now() - startTime;
+
+    // Check if at least one mode succeeded
+    const hasSuccess = Object.values(modeLogs).some((log) => log !== null);
+
+    if (!hasSuccess) {
+      return err(`All modes failed: ${errors.join('; ')}`);
+    }
+
+    return ok({
+      baseUrl,
+      modes: modes.filter((m) => modeLogs[m] !== null),
+      urlsVisited: Array.from(allUrls),
+      actions: allActions,
+      responses: allResponses,
+      modeLogs,
+      duration,
+      success: errors.length === 0,
+      ...(errors.length > 0 && { errors }),
+    });
   }
 
   /**
@@ -213,6 +366,135 @@ export class SurfaceExplorer {
         timestamp: new Date().toISOString(),
       });
     });
+  }
+
+  /**
+   * Authenticate using provided credentials
+   */
+  private async authenticate(
+    baseUrl: string,
+    mode: ExplorationMode,
+    options: ExploreOptions
+  ): Promise<Result<void, string>> {
+    if (this.page === null) {
+      return err('Page not initialized');
+    }
+
+    const credentials = options.credentials;
+    if (!credentials) {
+      return err('Credentials not provided');
+    }
+
+    // Determine which credentials to use
+    let username: string;
+    let password: string;
+
+    if (mode === 'authenticated') {
+      if (!credentials.user) {
+        return err('User credentials not provided for authenticated mode');
+      }
+      username = credentials.user.username;
+      password = credentials.user.password;
+    } else if (mode === 'privileged') {
+      if (!credentials.admin) {
+        return err('Admin credentials not provided for privileged mode');
+      }
+      username = credentials.admin.username;
+      password = credentials.admin.password;
+    } else {
+      return err(`Authentication not supported for mode: ${mode}`);
+    }
+
+    try {
+      // Determine login URL
+      const loginUrl = credentials.loginUrl ?? `${baseUrl}/login`;
+
+      // Navigate to login page
+      await this.page.goto(loginUrl, { waitUntil: 'domcontentloaded' });
+
+      this.actions.push({
+        type: 'navigate',
+        target: loginUrl,
+        description: `Navigate to login page (${mode} mode)`,
+        timestamp: new Date().toISOString(),
+      });
+
+      // Wait for page to be ready
+      await this.page.waitForLoadState('domcontentloaded');
+
+      // Find and fill username field
+      const usernameSelector =
+        credentials.selectors?.usernameField ??
+        'input[name="username"], input[type="email"], input[name="email"]';
+      const usernameField = this.page.locator(usernameSelector).first();
+
+      if ((await usernameField.count()) === 0) {
+        return err(
+          `Username field not found with selector: ${usernameSelector}`
+        );
+      }
+
+      await usernameField.fill(username);
+
+      this.actions.push({
+        type: 'fill',
+        target: 'username',
+        description: `Fill username field (${mode} mode)`,
+        timestamp: new Date().toISOString(),
+        value: username,
+      });
+
+      // Find and fill password field
+      const passwordSelector =
+        credentials.selectors?.passwordField ?? 'input[type="password"]';
+      const passwordField = this.page.locator(passwordSelector).first();
+
+      if ((await passwordField.count()) === 0) {
+        return err(
+          `Password field not found with selector: ${passwordSelector}`
+        );
+      }
+
+      await passwordField.fill(password);
+
+      this.actions.push({
+        type: 'fill',
+        target: 'password',
+        description: `Fill password field (${mode} mode)`,
+        timestamp: new Date().toISOString(),
+        value: '***',
+      });
+
+      // Find and click submit button
+      const submitSelector =
+        credentials.selectors?.submitButton ??
+        'button[type="submit"], input[type="submit"]';
+      const submitButton = this.page.locator(submitSelector).first();
+
+      if ((await submitButton.count()) === 0) {
+        return err(`Submit button not found with selector: ${submitSelector}`);
+      }
+
+      await submitButton.click();
+
+      this.actions.push({
+        type: 'submit',
+        target: 'login-form',
+        description: `Submit login form (${mode} mode)`,
+        timestamp: new Date().toISOString(),
+      });
+
+      // Wait for navigation after login
+      await this.page.waitForLoadState('domcontentloaded');
+
+      // Small delay to ensure session is established
+      await this.page.waitForTimeout(500);
+
+      return ok(undefined);
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error);
+      return err(`Authentication failed: ${message}`);
+    }
   }
 
   /**
