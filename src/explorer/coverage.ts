@@ -12,6 +12,22 @@ import * as path from 'node:path';
 import { type Result, ok, err } from '../shared/result.js';
 
 // ============================================================================
+// Constants
+// ============================================================================
+
+/**
+ * Delay in milliseconds to wait for c8 to finish writing coverage files
+ * after process exit
+ */
+const COVERAGE_WRITE_DELAY_MS = 1000;
+
+/**
+ * Timeout in milliseconds before forcing SIGKILL on a process that
+ * hasn't responded to SIGTERM
+ */
+const SIGKILL_TIMEOUT_MS = 5000;
+
+// ============================================================================
 // Types
 // ============================================================================
 
@@ -146,7 +162,9 @@ export class CoverageCollector {
       '--reports-dir',
       this.coverageDir,
       '--reporter=json',
-      '--clean=false', // We'll clean manually
+      // Don't auto-clean - we handle cleanup manually via cleanup() method
+      // and at the start of each startInstrumented() call
+      '--clean=false',
     ];
 
     // Add include patterns
@@ -207,7 +225,7 @@ export class CoverageCollector {
     // Check if process has already exited
     if (this.process.exitCode !== null) {
       // Process already exited, wait for c8 to finish writing
-      await new Promise((r) => setTimeout(r, 1000));
+      await new Promise((r) => setTimeout(r, COVERAGE_WRITE_DELAY_MS));
       const result = await this.parseCoverageData();
       this.process = null;
       return result;
@@ -224,13 +242,13 @@ export class CoverageCollector {
         if (this.process !== null && this.process.exitCode === null) {
           this.process.kill('SIGKILL');
         }
-      }, 5000);
+      }, SIGKILL_TIMEOUT_MS);
 
       this.process.on('exit', async () => {
         clearTimeout(timeoutId);
 
         // Wait for c8 to write coverage files
-        await new Promise((r) => setTimeout(r, 1000));
+        await new Promise((r) => setTimeout(r, COVERAGE_WRITE_DELAY_MS));
 
         // Parse coverage data
         const coverageResult = await this.parseCoverageData();

@@ -179,8 +179,8 @@ describe('CoverageCollector', () => {
       );
       expect(isOk(startResult)).toBe(true);
 
-      // Wait a bit for the app to run
-      await new Promise((resolve) => setTimeout(resolve, 500));
+      // Wait for the app to complete (sample app exits after 100ms)
+      await new Promise((resolve) => setTimeout(resolve, 800));
 
       const result = await collector.stopAndCollect();
 
@@ -212,8 +212,8 @@ describe('CoverageCollector', () => {
       );
       expect(isOk(startResult)).toBe(true);
 
-      // Wait for the app to complete
-      await new Promise((resolve) => setTimeout(resolve, 500));
+      // Wait for the app to complete (sample app exits after 100ms)
+      await new Promise((resolve) => setTimeout(resolve, 800));
 
       const result = await collector.stopAndCollect();
 
@@ -252,8 +252,8 @@ describe('CoverageCollector', () => {
       );
       expect(isOk(startResult)).toBe(true);
 
-      // Wait for the app to complete
-      await new Promise((resolve) => setTimeout(resolve, 500));
+      // Wait for the app to complete (sample app exits after 100ms)
+      await new Promise((resolve) => setTimeout(resolve, 800));
 
       const result = await collector.stopAndCollect();
 
@@ -308,7 +308,8 @@ describe('CoverageCollector', () => {
       );
       expect(isOk(startResult)).toBe(true);
 
-      await new Promise((resolve) => setTimeout(resolve, 500));
+      // Wait for the app to complete (sample app exits after 100ms)
+      await new Promise((resolve) => setTimeout(resolve, 800));
       await collector.stopAndCollect();
 
       expect(collector.isRunning()).toBe(false);
@@ -331,11 +332,14 @@ describe('CoverageCollector', () => {
       });
       expect(isOk(result)).toBe(true);
 
-      await new Promise((resolve) => setTimeout(resolve, 100));
+      const delayMs = 100;
+      await new Promise((resolve) => setTimeout(resolve, delayMs));
 
       const elapsed = collector.getElapsedTime();
       expect(elapsed).not.toBeNull();
-      expect(elapsed).toBeGreaterThanOrEqual(90); // Allow for slight timing variance
+      // Allow for slight timing variance (10ms buffer)
+      const minExpectedElapsedMs = delayMs - 10;
+      expect(elapsed).toBeGreaterThanOrEqual(minExpectedElapsedMs);
     });
   });
 
