@@ -7,3 +7,11 @@
 
 export type { Line, CoverageData, InstrumentedOptions } from './coverage.js';
 export { CoverageCollector } from './coverage.js';
+
+export type {
+  ExploreOptions,
+  ExplorationAction,
+  CapturedResponse,
+  ExplorationLog,
+} from './surface.js';
+export { SurfaceExplorer } from './surface.js';

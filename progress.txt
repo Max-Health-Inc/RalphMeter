@@ -244,3 +244,34 @@ it passes ALL applicable gates. Dead code and untested code are properly exclude
   - Race conditions exist between process exit and coverage file writing - always add delay
 
 ---
+
+## 2026-02-01 - US-013
+- Implemented: AI Explorer - Surface Explorer
+- Files changed:
+  - Created src/explorer/surface.ts - SurfaceExplorer class with Playwright-based AI exploration
+  - Created src/explorer/surface.test.ts - Comprehensive tests with test server (12 tests)
+  - Created src/explorer/test-fixtures/test-server.js - Simple HTTP server for testing exploration
+  - Modified src/explorer/index.ts - Added surface explorer exports to barrel
+  - Modified src/types/index.ts - Added surface explorer type exports
+  - Modified prd.json - Marked US-013 as passes: true
+  - Modified package.json - Added playwright and @playwright/test as dependencies
+- **Learnings for future iterations:**
+  - Playwright provides excellent browser automation for AI-driven exploration
+  - Playwright's Locator type should be imported and used explicitly to avoid 'any' type issues
+  - Use chromium.launch() for headless browser automation with configurable viewport
+  - Collect links before interacting with elements to avoid page state changes affecting navigation
+  - Use domcontentloaded wait strategy instead of networkidle for faster page loads
+  - Response listener setup via page.on('response') captures all HTTP traffic including status codes
+  - Normalize URLs by removing trailing slashes and fragments to avoid duplicate visits
+  - Only follow same-domain links to prevent escaping the application boundary
+  - Forms need explicit handling: fill inputs first, then click submit button
+  - Use locator('button:not(form button)') to exclude form buttons from standalone button clicks
+  - Test server should use port 0 for dynamic port allocation to avoid conflicts
+  - ESLint strict mode requires explicit boolean comparisons (use `=== true` not just truthiness)
+  - ESLint strict mode requires explicit empty string checks (use `=== ''` not just `!str`)
+  - Prefix unused parameters with underscore (_currentDepth) to satisfy ESLint rules
+  - Use try-catch with empty catch blocks for graceful error handling in automation loops
+  - Playwright browser and page instances must be properly cleaned up to avoid resource leaks
+  - Install Playwright browsers separately with `npx playwright install chromium`
+
+---

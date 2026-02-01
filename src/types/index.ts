@@ -37,3 +37,10 @@ export type {
   CoverageData,
   InstrumentedOptions,
 } from '../explorer/coverage.js';
+
+export type {
+  ExploreOptions,
+  ExplorationAction,
+  CapturedResponse,
+  ExplorationLog,
+} from '../explorer/surface.js';

@@ -255,7 +255,7 @@
         "Typecheck passes"
       ],
       "priority": 13,
-      "passes": false,
+      "passes": true,
       "notes": "AI explores every surface to prove reachability, not just test paths."
     },
     {
