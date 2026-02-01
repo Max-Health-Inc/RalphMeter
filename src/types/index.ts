@@ -39,10 +39,13 @@ export type {
 } from '../explorer/coverage.js';
 
 export type {
+  ExplorationMode,
+  ExplorationCredentials,
   ExploreOptions,
   ExplorationAction,
   CapturedResponse,
   ExplorationLog,
+  MergedExplorationLog,
 } from '../explorer/surface.js';
 
 export type {

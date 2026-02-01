@@ -290,7 +290,7 @@
         "Typecheck passes"
       ],
       "priority": 15,
-      "passes": false,
+      "passes": true,
       "notes": "Different modes unlock different code paths for verification."
     },
     {

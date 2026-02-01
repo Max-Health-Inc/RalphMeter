@@ -252,4 +252,243 @@ describe('SurfaceExplorer', () => {
       expect(explorer.isRunning()).toBe(false);
     });
   });
+
+  describe('exploration modes', () => {
+    it('should explore in anonymous mode (default)', async () => {
+      const explorer = new SurfaceExplorer();
+      const result = await explorer.explore(baseUrl, {
+        timeout: 10000,
+        maxDepth: 0,
+        mode: 'anonymous',
+      });
+
+      expect(isOk(result)).toBe(true);
+      if (isOk(result)) {
+        const log = result.value;
+        expect(log.success).toBe(true);
+        expect(log.mode).toBe('anonymous');
+      }
+    }, 30000);
+
+    it('should explore in authenticated mode', async () => {
+      const explorer = new SurfaceExplorer();
+      const result = await explorer.explore(baseUrl, {
+        timeout: 15000,
+        maxDepth: 0,
+        mode: 'authenticated',
+        credentials: {
+          user: {
+            username: 'user',
+            password: 'password123',
+          },
+        },
+      });
+
+      expect(isOk(result)).toBe(true);
+      if (isOk(result)) {
+        const log = result.value;
+        expect(log.success).toBe(true);
+        expect(log.mode).toBe('authenticated');
+
+        // Should have login actions
+        const loginActions = log.actions.filter(
+          (a) =>
+            a.description.includes('login') || a.description.includes('authenticated')
+        );
+        expect(loginActions.length).toBeGreaterThan(0);
+      }
+    }, 30000);
+
+    it('should explore in privileged mode', async () => {
+      const explorer = new SurfaceExplorer();
+      const result = await explorer.explore(baseUrl, {
+        timeout: 15000,
+        maxDepth: 0,
+        mode: 'privileged',
+        credentials: {
+          admin: {
+            username: 'admin',
+            password: 'admin123',
+          },
+        },
+      });
+
+      expect(isOk(result)).toBe(true);
+      if (isOk(result)) {
+        const log = result.value;
+        expect(log.success).toBe(true);
+        expect(log.mode).toBe('privileged');
+
+        // Should have login actions
+        const loginActions = log.actions.filter(
+          (a) =>
+            a.description.includes('login') || a.description.includes('privileged')
+        );
+        expect(loginActions.length).toBeGreaterThan(0);
+      }
+    }, 30000);
+
+    it('should fail authenticated mode without credentials', async () => {
+      const explorer = new SurfaceExplorer();
+      const result = await explorer.explore(baseUrl, {
+        timeout: 10000,
+        maxDepth: 0,
+        mode: 'authenticated',
+      });
+
+      expect(isErr(result)).toBe(true);
+      if (isErr(result)) {
+        expect(result.error).toContain('Credentials not provided');
+      }
+    }, 30000);
+
+    it('should fail privileged mode without admin credentials', async () => {
+      const explorer = new SurfaceExplorer();
+      const result = await explorer.explore(baseUrl, {
+        timeout: 10000,
+        maxDepth: 0,
+        mode: 'privileged',
+        credentials: {
+          user: {
+            username: 'user',
+            password: 'password123',
+          },
+        },
+      });
+
+      expect(isErr(result)).toBe(true);
+      if (isErr(result)) {
+        expect(result.error).toContain('Admin credentials not provided');
+      }
+    }, 30000);
+
+    it('should reject full mode with explore() method', async () => {
+      const explorer = new SurfaceExplorer();
+      const result = await explorer.explore(baseUrl, {
+        timeout: 10000,
+        maxDepth: 0,
+        mode: 'full',
+      });
+
+      expect(isErr(result)).toBe(true);
+      if (isErr(result)) {
+        expect(result.error).toContain('Use exploreAll()');
+      }
+    }, 30000);
+  });
+
+  describe('exploreAll', () => {
+    it('should run all modes and merge results', async () => {
+      const explorer = new SurfaceExplorer();
+      const result = await explorer.exploreAll(baseUrl, {
+        timeout: 15000,
+        maxDepth: 0,
+        credentials: {
+          user: {
+            username: 'user',
+            password: 'password123',
+          },
+          admin: {
+            username: 'admin',
+            password: 'admin123',
+          },
+        },
+      });
+
+      expect(isOk(result)).toBe(true);
+      if (isOk(result)) {
+        const log = result.value;
+        expect(log.success).toBe(true);
+
+        // Should have results from all three modes
+        expect(log.modes.length).toBe(3);
+        expect(log.modes).toContain('anonymous');
+        expect(log.modes).toContain('authenticated');
+        expect(log.modes).toContain('privileged');
+
+        // Should have merged URLs, actions, and responses
+        expect(log.urlsVisited.length).toBeGreaterThan(0);
+        expect(log.actions.length).toBeGreaterThan(0);
+        expect(log.responses.length).toBeGreaterThan(0);
+
+        // Each mode should have its own log
+        expect(log.modeLogs.anonymous).not.toBeNull();
+        expect(log.modeLogs.authenticated).not.toBeNull();
+        expect(log.modeLogs.privileged).not.toBeNull();
+      }
+    }, 60000);
+
+    it('should skip authenticated mode if no user credentials', async () => {
+      const explorer = new SurfaceExplorer();
+      const result = await explorer.exploreAll(baseUrl, {
+        timeout: 15000,
+        maxDepth: 0,
+        credentials: {
+          admin: {
+            username: 'admin',
+            password: 'admin123',
+          },
+        },
+      });
+
+      expect(isOk(result)).toBe(true);
+      if (isOk(result)) {
+        const log = result.value;
+
+        // Should only have anonymous and privileged
+        expect(log.modes).toContain('anonymous');
+        expect(log.modes).toContain('privileged');
+        expect(log.modes).not.toContain('authenticated');
+
+        expect(log.modeLogs.authenticated).toBeNull();
+      }
+    }, 45000);
+
+    it('should skip privileged mode if no admin credentials', async () => {
+      const explorer = new SurfaceExplorer();
+      const result = await explorer.exploreAll(baseUrl, {
+        timeout: 15000,
+        maxDepth: 0,
+        credentials: {
+          user: {
+            username: 'user',
+            password: 'password123',
+          },
+        },
+      });
+
+      expect(isOk(result)).toBe(true);
+      if (isOk(result)) {
+        const log = result.value;
+
+        // Should only have anonymous and authenticated
+        expect(log.modes).toContain('anonymous');
+        expect(log.modes).toContain('authenticated');
+        expect(log.modes).not.toContain('privileged');
+
+        expect(log.modeLogs.privileged).toBeNull();
+      }
+    }, 45000);
+
+    it('should run only anonymous mode if no credentials', async () => {
+      const explorer = new SurfaceExplorer();
+      const result = await explorer.exploreAll(baseUrl, {
+        timeout: 10000,
+        maxDepth: 0,
+      });
+
+      expect(isOk(result)).toBe(true);
+      if (isOk(result)) {
+        const log = result.value;
+
+        // Should only have anonymous
+        expect(log.modes.length).toBe(1);
+        expect(log.modes).toContain('anonymous');
+
+        expect(log.modeLogs.anonymous).not.toBeNull();
+        expect(log.modeLogs.authenticated).toBeNull();
+        expect(log.modeLogs.privileged).toBeNull();
+      }
+    }, 30000);
+  });
 });
