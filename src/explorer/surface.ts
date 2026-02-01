@@ -151,7 +151,8 @@ export class SurfaceExplorer {
         success: true,
       });
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : String(error);
+      const errorMessage =
+        error instanceof Error ? error.message : String(error);
 
       // Cleanup on error
       await this.cleanup();
@@ -393,7 +394,7 @@ export class SurfaceExplorer {
         try {
           const isVisible = await submitButton.isVisible();
           const isEnabled = await submitButton.isEnabled();
-          
+
           if (isVisible && isEnabled) {
             await submitButton.click({ timeout: 5000 });
 

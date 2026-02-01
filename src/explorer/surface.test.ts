@@ -134,9 +134,11 @@ describe('SurfaceExplorer', () => {
         const log = result.value;
         // Should visit multiple pages (home + linked pages)
         expect(log.urlsVisited.length).toBeGreaterThan(1);
-        
+
         // Should have navigate actions
-        const navigateActions = log.actions.filter((a) => a.type === 'navigate');
+        const navigateActions = log.actions.filter(
+          (a) => a.type === 'navigate'
+        );
         expect(navigateActions.length).toBeGreaterThan(1);
       }
     }, 30000);
@@ -152,7 +154,7 @@ describe('SurfaceExplorer', () => {
       if (isOk(result)) {
         const log = result.value;
         expect(log.responses.length).toBeGreaterThan(0);
-        
+
         // Check that responses have the required fields
         for (const response of log.responses) {
           expect(response.url).toBeDefined();
@@ -188,7 +190,7 @@ describe('SurfaceExplorer', () => {
       expect(isOk(result)).toBe(true);
       if (isOk(result)) {
         const log = result.value;
-        
+
         // All visited URLs should be on the same domain
         for (const url of log.urlsVisited) {
           expect(url).toContain(`localhost:${String(testServerPort)}`);
@@ -217,7 +219,7 @@ describe('SurfaceExplorer', () => {
       expect(isOk(result)).toBe(true);
       if (isOk(result)) {
         const log = result.value;
-        
+
         for (const action of log.actions) {
           expect(action.timestamp).toBeDefined();
           // Check that timestamp is a valid ISO string
@@ -237,7 +239,7 @@ describe('SurfaceExplorer', () => {
       if (isOk(result)) {
         const log = result.value;
         const submitActions = log.actions.filter((a) => a.type === 'submit');
-        
+
         // Should have at least one submit action (from the form)
         expect(submitActions.length).toBeGreaterThan(0);
       }
