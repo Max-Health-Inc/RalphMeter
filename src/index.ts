@@ -24,6 +24,9 @@ export * from './benchmarks/index.js';
 // Export export module
 export * from './export/index.js';
 
+// Export analysis module
+export * from './analysis/index.js';
+
 // Export explorer module
 export * from './explorer/index.js';
 

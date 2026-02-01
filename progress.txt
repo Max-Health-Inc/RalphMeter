@@ -408,3 +408,31 @@ it passes ALL applicable gates. Dead code and untested code are properly exclude
   - Use Result type imports (not import() type annotations) for consistency
   - Test files already passing at runtime may still have TypeScript compilation issues
 ---
+
+## 2026-02-01 - US-019
+- Implemented: Session Analyzer - Tools for debugging and understanding individual Ralph runs
+- Files changed:
+  - Created src/analysis/timeline.ts - SessionTimelineGenerator class with iteration-by-iteration views, Ralph trends, spike detection
+  - Created src/analysis/diagnosis.ts - SessionDiagnosis class for story-level diagnosis with gate failures and recommendations
+  - Created src/analysis/replay.ts - SessionReplayGenerator for reconstructing iteration-by-iteration state
+  - Created src/analysis/index.ts - Barrel exports for analysis module
+  - Created src/analysis/timeline.test.ts - 9 comprehensive tests
+  - Created src/analysis/diagnosis.test.ts - 12 comprehensive tests
+  - Created src/analysis/replay.test.ts - 11 comprehensive tests
+  - Modified src/index.ts - Added analysis module to main exports
+  - Modified src/api/server.ts - Added SessionTimelineGenerator and SessionDiagnosis to server, added GET /api/sessions/:id/timeline and GET /api/sessions/:id/diagnosis/:storyId endpoints
+  - Modified prd.json - Marked US-019 as passes: true
+- **Learnings for future iterations:**
+  - Timeline spike detection requires >20% increase threshold in Ralph from previous iteration
+  - SynthTrend mapping uses storyId lookup - when multiple iterations have same storyId, only first match is used
+  - For spike detection tests, use different storyIds for each iteration to ensure proper Ralph mapping
+  - Use MeterEvent type for arrays but don't import specific event types if only using union narrowing in switch/case
+  - ESLint requires String() wrapper for all numbers in template literals (@typescript-eslint/restrict-template-expressions)
+  - Vitest's `expect.stringContaining()` doesn't work reliably - use `.some(e => e.includes('text'))` instead
+  - Diagnosis tracks gate failures from compilation_result, test_result events and gate tracker
+  - Test events don't include line-level failure data - only aggregate counts
+  - Story completion uses `passes` field, not `passed` (from event schema)
+  - Request params from Express are `string | string[]` - always check with typeof before use
+  - Timeline, diagnosis, and replay modules provide three different views: time-series trends, problem diagnosis, and event reconstruction
+  - All 32 tests pass with comprehensive coverage of edge cases
+---

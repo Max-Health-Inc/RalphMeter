@@ -23,6 +23,10 @@ import { exportSession as exportSessionData } from '../export/exporter.js';
 import { ReachabilityReport } from '../explorer/report.js';
 import type { CoverageData } from '../explorer/coverage.js';
 import type { BarrierAnalysis } from '../explorer/barriers.js';
+import {
+  SessionTimelineGenerator,
+  SessionDiagnosis,
+} from '../analysis/index.js';
 
 // ============================================================================
 // Types
@@ -122,6 +126,8 @@ export class RalphMeterServer {
   private locCounter: LOCCounter;
   private metricsCalculator: MetricsCalculator;
   private reachabilityReport: ReachabilityReport;
+  private timelineGenerator: SessionTimelineGenerator;
+  private diagnosis: SessionDiagnosis;
 
   constructor() {
     this.app = express();
@@ -134,6 +140,8 @@ export class RalphMeterServer {
       this.locCounter
     );
     this.reachabilityReport = new ReachabilityReport();
+    this.timelineGenerator = new SessionTimelineGenerator(this.collector);
+    this.diagnosis = new SessionDiagnosis(this.collector, this.gateTracker);
 
     this.setupMiddleware();
     this.setupRoutes();
@@ -238,6 +246,18 @@ export class RalphMeterServer {
     this.app.post(
       '/api/sessions/:id/reachability',
       this.asyncHandler(this.getReachability.bind(this))
+    );
+
+    // GET /api/sessions/:id/timeline - get session timeline
+    this.app.get(
+      '/api/sessions/:id/timeline',
+      this.asyncHandler(this.getTimeline.bind(this))
+    );
+
+    // GET /api/sessions/:id/diagnosis/:storyId - diagnose story
+    this.app.get(
+      '/api/sessions/:id/diagnosis/:storyId',
+      this.asyncHandler(this.getDiagnosis.bind(this))
     );
   }
 
@@ -629,6 +649,83 @@ export class RalphMeterServer {
     );
 
     res.json(report);
+  }
+
+  /**
+   * GET /api/sessions/:id/timeline - Get session timeline
+   */
+  private getTimeline(req: Request, res: Response): void {
+    const sessionId = req.params['id'];
+
+    if (sessionId === undefined || typeof sessionId !== 'string') {
+      res.status(400).json({
+        error: 'Missing session ID',
+        code: 'VALIDATION_ERROR',
+      } satisfies ApiError);
+      return;
+    }
+
+    // Get Ralph trend from metrics calculator
+    const synthTrend = this.metricsCalculator.getSynthTrend(sessionId);
+
+    // Generate timeline
+    const timelineResult = this.timelineGenerator.generate(
+      sessionId,
+      synthTrend
+    );
+
+    if (!timelineResult.ok) {
+      const statusCode =
+        timelineResult.error.code === 'SESSION_NOT_FOUND' ? 404 : 400;
+      res.status(statusCode).json({
+        error: timelineResult.error.message,
+        code: timelineResult.error.code,
+        details: timelineResult.error.details,
+      } satisfies ApiError);
+      return;
+    }
+
+    res.json(timelineResult.value);
+  }
+
+  /**
+   * GET /api/sessions/:id/diagnosis/:storyId - Diagnose story
+   */
+  private getDiagnosis(req: Request, res: Response): void {
+    const sessionId = req.params['id'];
+    const storyId = req.params['storyId'];
+
+    if (
+      sessionId === undefined ||
+      typeof sessionId !== 'string' ||
+      storyId === undefined ||
+      typeof storyId !== 'string'
+    ) {
+      res.status(400).json({
+        error: 'Missing session ID or story ID',
+        code: 'VALIDATION_ERROR',
+      } satisfies ApiError);
+      return;
+    }
+
+    // Diagnose the story
+    const diagnosisResult = this.diagnosis.diagnose(sessionId, storyId);
+
+    if (!diagnosisResult.ok) {
+      const statusCode =
+        diagnosisResult.error.code === 'SESSION_NOT_FOUND' ||
+        diagnosisResult.error.code === 'STORY_NOT_FOUND'
+          ? 404
+          : 400;
+      res.status(statusCode).json({
+        error: diagnosisResult.error.message,
+        code: diagnosisResult.error.code,
+        details: diagnosisResult.error.details,
+      } satisfies ApiError);
+      return;
+    }
+
+    res.json(diagnosisResult.value);
   }
 
   /**
