@@ -30,3 +30,10 @@ export type {
 // export * from '../core/loc.js';
 // export * from '../core/gates.js';
 // export * from '../core/metrics.js';
+
+// Re-export explorer types
+export type {
+  Line,
+  CoverageData,
+  InstrumentedOptions,
+} from '../explorer/coverage.js';

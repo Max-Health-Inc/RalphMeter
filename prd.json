@@ -238,7 +238,7 @@
         "Tests pass with sample app"
       ],
       "priority": 12,
-      "passes": false,
+      "passes": true,
       "notes": "Foundation for G3 reachability via actual runtime execution."
     },
     {
