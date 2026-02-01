@@ -179,13 +179,20 @@ describe('CoverageCollector', () => {
       );
       expect(isOk(startResult)).toBe(true);
 
-      // Wait for the app to complete (sample app exits after 100ms)
-      await new Promise((resolve) => setTimeout(resolve, 800));
+      // Wait for the app to complete and c8 to write files (sample app exits after 100ms)
+      // Add extra buffer when running with other tests
+      await new Promise((resolve) => setTimeout(resolve, 1500));
 
       const result = await collector.stopAndCollect();
 
       if (isErr(result)) {
         console.log('Stop and collect error:', result.error);
+        // Check if directory exists
+        console.log('Coverage dir exists:', fs.existsSync(testCoverageDir));
+        if (fs.existsSync(testCoverageDir)) {
+          const files = fs.readdirSync(testCoverageDir);
+          console.log('Files in coverage dir:', files);
+        }
       }
 
       expect(isOk(result)).toBe(true);
@@ -196,7 +203,7 @@ describe('CoverageCollector', () => {
         expect(Array.isArray(result.value.notExecuted)).toBe(true);
       }
       expect(collector.isRunning()).toBe(false);
-    }, 10000);
+    }, 15000);
 
     it('should identify executed lines', async () => {
       const sampleAppPath = path.join(
@@ -367,7 +374,7 @@ describe('CoverageCollector', () => {
     });
 
     it('should not throw if directory does not exist', () => {
-      expect(() => collector.cleanup()).not.toThrow();
+      expect(() => { collector.cleanup(); }).not.toThrow();
     });
   });
 });

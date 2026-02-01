@@ -90,10 +90,6 @@ interface V8ScriptCoverage {
   functions: V8FunctionCoverage[];
 }
 
-interface V8Coverage {
-  result: V8ScriptCoverage[];
-}
-
 // ============================================================================
 // CoverageCollector
 // ============================================================================
@@ -244,17 +240,20 @@ export class CoverageCollector {
         }
       }, SIGKILL_TIMEOUT_MS);
 
-      this.process.on('exit', async () => {
+      this.process.on('exit', () => {
         clearTimeout(timeoutId);
 
-        // Wait for c8 to write coverage files
-        await new Promise((r) => setTimeout(r, COVERAGE_WRITE_DELAY_MS));
+        // Use void to explicitly ignore the promise
+        void (async (): Promise<void> => {
+          // Wait for c8 to write coverage files
+          await new Promise((r) => setTimeout(r, COVERAGE_WRITE_DELAY_MS));
 
-        // Parse coverage data
-        const coverageResult = await this.parseCoverageData();
-        this.process = null;
+          // Parse coverage data
+          const coverageResult = await this.parseCoverageData();
+          this.process = null;
 
-        resolve(coverageResult);
+          resolve(coverageResult);
+        })();
       });
 
       // Send SIGTERM to gracefully shut down (if not already exited)
@@ -291,9 +290,9 @@ export class CoverageCollector {
 
         // Get line coverage information
         const statementMap =
-          (fileCoverage as any).statementMap ?? ({} as Record<string, any>);
+          (fileCoverage).statementMap ?? ({} as Record<string, any>);
         const statements =
-          (fileCoverage as any).s ?? ({} as Record<string, number>);
+          (fileCoverage).s ?? ({} as Record<string, number>);
 
         // Build a map of line numbers to execution counts
         const lineExecutionCounts = new Map<number, number>();
