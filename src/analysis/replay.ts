@@ -7,16 +7,7 @@
 
 import { type Result, ok, err } from '../shared/result.js';
 import { type EventCollector, type Session } from '../core/collector.js';
-import {
-  type MeterEvent,
-  type IterationStartEvent,
-  type IterationEndEvent,
-  type CompilationResultEvent,
-  type TestResultEvent,
-  type TokensInEvent,
-  type TokensOutEvent,
-  type StoryCompleteEvent,
-} from '../core/events.js';
+import { type MeterEvent } from '../core/events.js';
 
 // ============================================================================
 // Types

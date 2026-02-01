@@ -7,13 +7,6 @@
 
 import { type Result, ok, err } from '../shared/result.js';
 import { type EventCollector, type Session } from '../core/collector.js';
-import {
-  type MeterEvent,
-  type IterationStartEvent,
-  type IterationEndEvent,
-  type TokensInEvent,
-  type TokensOutEvent,
-} from '../core/events.js';
 import { type SynthTrendPoint } from '../core/metrics.js';
 
 // ============================================================================

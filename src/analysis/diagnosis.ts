@@ -6,23 +6,9 @@
  */
 
 import { type Result, ok, err } from '../shared/result.js';
-import {
-  type EventCollector,
-  type Session,
-} from '../core/collector.js';
-import {
-  type GateTracker,
-  type CoreGate,
-} from '../core/gates.js';
-import {
-  type MeterEvent,
-  type IterationStartEvent,
-  type IterationEndEvent,
-  type TokensInEvent,
-  type TokensOutEvent,
-  type CompilationResultEvent,
-  type TestResultEvent,
-} from '../core/events.js';
+import { type EventCollector, type Session } from '../core/collector.js';
+import { type MeterEvent } from '../core/events.js';
+import { type GateTracker, type CoreGate } from '../core/gates.js';
 
 // ============================================================================
 // Types
