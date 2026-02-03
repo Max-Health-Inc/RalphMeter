@@ -126,7 +126,7 @@ Sessions support optional tags for arbitrary metadata:
 ```
 
 Use tags to:
-- Track different methodologies (Josh Mandel's modes, custom workflows)
+- Track different methodologies (agent modes, custom workflows)
 - A/B test agent configurations
 - Compare human-assisted vs fully autonomous sessions
 
@@ -136,6 +136,30 @@ Use tags to:
 npm install
 npm run dev
 ```
+
+## Best Practices
+
+### The 3:1 Refactoring Rule
+
+For sustainable development, follow a **3:1 rhythm**:
+
+```
+PRD 1: Feature A     → Ralph = 32, vRate = 78%
+PRD 2: Feature B     → Ralph = 28, vRate = 75%
+PRD 3: Feature C     → Ralph = 35, vRate = 68% ⚠️ cruft accumulating
+PRD 4: Refactor      → Ralph = 42, vRate = 91% ✓ cleaned up
+```
+
+**After every 3 feature PRDs, add a refactoring PRD.**
+
+Note: Ralph will likely *increase* after refactoring (you spent tokens without adding features). The win is **verification rate** — the refactoring PRD:
+
+- Removes dead code that G3 revealed as unreachable
+- Consolidates duplicate patterns the agent created
+- Adds tests for undertested areas (improves G2 coverage)
+- Pays down technical debt before it compounds
+
+The goal isn't lowering Ralph in that moment — it's **improving vLOC/LOC** and preventing future Ralph explosions from working in a messy codebase.
 
 ## Ralph Integration
 
